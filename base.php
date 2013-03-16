@@ -15,12 +15,12 @@
 
   <div class="wrap container" role="document">
     <div class="content row">
-      <div class="main <?php echo roots_main_class(); ?>" role="main">
-        <?php include roots_template_path(); ?>
+      <div class="main" role="main">
+        <?php include p2_template_path(); ?>
       </div><!-- /.main -->
-      <?php if (roots_display_sidebar()) : ?>
-      <aside class="sidebar <?php echo roots_sidebar_class(); ?>" role="complementary">
-        <?php include roots_sidebar_path(); ?>
+      <?php if (p2_display_sidebar()) : ?>
+      <aside class="sidebar <?php echo p2_sidebar_class(); ?>" role="complementary">
+        <?php include p2_sidebar_path(); ?>
       </aside><!-- /.sidebar -->
       <?php endif; ?>
     </div><!-- /.content -->

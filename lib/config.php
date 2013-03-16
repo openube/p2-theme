@@ -57,19 +57,85 @@ class p2_theme_options
 				'title' => 'Theme Options',
 				'priority' => 35, 
 				'capability' => 'edit_theme_options',
-				'description' => 'Allows you to customize colours on the pages and blog.',
+				'description' => 'Allows you to customize site options.',
+				'fields' => array(
+					'google_analytics_id' => array(
+						'label' => 'Google Analytics ID',
+						'type' => 'text',
+						'default' => ''
+					),
+					'excerpt_length' => array(
+						'label' => 'Length of Post excerpts',
+						'type' => 'number',
+						'default' => '50'
+					),
+					'excerpt_length' => array(
+						'label' => '"Read more" link text',
+						'type' => 'text',
+						'default' => 'Read More&helli[p;'
+					)
+				)
+			),
+			array(
+				'section' => 'theme_colours',
+				'title' => 'Theme Colours',
+				'priority' => 36, 
+				'capability' => 'edit_theme_options',
+				'description' => 'Allows you to customize site colours.',
 				'fields' => array(
 					'background_colour' => array(
 						'label' => 'Background colour',
 						'type' => 'colour',
-						'default' => '#5bb173',
-						'selector' => 'html,body,.search form p.hellip span,.goButton a',
+						'default' => '#ffffff',
+						'selector' => 'html,body',
 						'rules' => '{background-color:%s}'
+					),
+					'text_colour' => array(
+						'label' => 'Text colour',
+						'type' => 'colour',
+						'default' => '#000000',
+						'selector' => 'html,body',
+						'rules' => '{color:%s}'
+					),
+					'heading_colour' => array(
+						'label' => 'Heading colour',
+						'type' => 'colour',
+						'default' => '#0000ff',
+						'selector' => 'h1,h2,h3,h4,h5,h6',
+						'rules' => '{color:%s}'
+					),
+					'link_colour' => array(
+						'label' => 'Link colour',
+						'type' => 'colour',
+						'default' => '#0000cc',
+						'selector' => 'a',
+						'rules' => '{color:%s}'
+					),
+					'link_hover_colour' => array(
+						'label' => 'Link colour (hover)',
+						'type' => 'colour',
+						'default' => '#0000ff',
+						'selector' => 'a:hover',
+						'rules' => '{color:%s}'
+					),
+					'link_active_colour' => array(
+						'label' => 'Link colour (active)',
+						'type' => 'colour',
+						'default' => '#ff0000',
+						'selector' => 'a:active',
+						'rules' => '{color:%s}'
+					),
+					'link_visited_colour' => array(
+						'label' => 'Link colour',
+						'type' => 'colour',
+						'default' => '#0000cc',
+						'selector' => 'a:visited',
+						'rules' => '{color:%s}'
 					)
 				)
 			)
 		);
-		return $customiser_options;
+		return $customisation_options;
 	}
 
 	/**
@@ -98,13 +164,15 @@ class p2_theme_options
 		$customiser_fields = self::get_customisation_options();
 		foreach ($customiser_fields as $cf) {
 			foreach ($cf['fields'] as $fieldname => $details) {
-				$value = isset($options[$fieldname])? $options[$fieldname]: $details['default'];
-				if (is_array($details['selector'])) {
-					for ($i = 0; $i < count($details['selector']); $i++) {
-						$out .= $details['selector'][$i] . sprintf($details['rules'][$i], $value);
+				if ($details["type"] == 'colour' || $details['type'] == 'colouralpha') {
+					$value = isset($options[$fieldname])? $options[$fieldname]: $details['default'];
+					if (is_array($details['selector'])) {
+						for ($i = 0; $i < count($details['selector']); $i++) {
+							$out .= $details['selector'][$i] . sprintf($details['rules'][$i], $value);
+						}
+					} else {
+						$out .= $details['selector'] . sprintf($details['rules'], $value);
 					}
-				} else {
-					$out .= $details['selector'] . sprintf($details['rules'], $value);
 				}
 			}
 		}
@@ -183,9 +251,13 @@ class p2_theme_options
 	/**
 	 * simple input field callback
 	 */
-	public static function option_text($fielddata)
+	public static function option_text($fielddata, $settings = array())
 	{
 		$options = self::get_theme_options();
+		$settings = wp_parse_args($settings, array(
+			"length" => 60,
+			"class" => ''
+			));
 		$field = $fielddata["field"];
 		$len = (isset($fielddata["length"]) && intVal($fielddata["length"]) > 0) ? $fielddata["length"] : 60;
 		$option_value = (isset($options[$field]) && trim($options[$field]) != "") ? trim($options[$field]) : "";
@@ -201,6 +273,19 @@ class p2_theme_options
 		$field = $fielddata["field"];
 		$option_value = (isset($options[$field]) && trim($options[$field]) != "") ? trim($options[$field]) : "";
 		printf('<input id="p2_options_%s" class="color-picker-hex" placeholder="Hex value" name="p2_options[%s]" type="text" data-default-color="%s" value="%s" size="7" />', $field, $field, $option_value, $option_value);
+	}
+
+	/**
+	 * colour input field callback with alpha
+	 */
+	public static function option_colouralpha($fielddata)
+	{
+		$options = self::get_wkw_options();
+		$field = $fielddata["field"];
+		$option_value = (isset($options[$field]) && trim($options[$field]) != "") ? trim($options[$field]) : "";
+		$ho = self::rgba2hexop($option_value);
+		//print_r($ho);
+		printf('<input id="wkw_options_%s_hex" class="color-picker-hex" placeholder="Hex value" name="wkw_options[%s][hex]" type="text" data-default-color="%s" value="%s" size="7" /><br />Opacity (1 = opaque, 0 = transparent): <input "wkw-options_%s_op" type="text" size="5" name="wkw_options[%s][op]" value="%s" />', $field, $field, $ho['hex'], $ho['hex'], $field, $field, $ho['op'], $ho['op']);
 	}
 
 	/**
@@ -220,8 +305,43 @@ class p2_theme_options
 	 */
 	public static function validate_theme_options($theme_options)
 	{
-		if (!isset($theme_options[""]) || trim($theme_options[""]) == "") {
-			add_settings_error("p2_options", "slug", "title");
+		$customiser_fields = self::get_customisation_options();
+		$options = self::get_theme_options();
+		foreach ($customiser_fields as $cf) {
+			foreach ($cf['fields'] as $fieldname => $details) {
+				if ( ! isset($options[$fieldname]) ) {
+					$options[$fieldname] = $details['default'];
+				}
+				if ( !isset($wkw_options[$fieldname])) {
+					$wkw_options[$fieldname] = $options[$fieldname];
+				}
+				switch ($details['type']) {
+				    case 'colour':
+				        if ( ! preg_match('/^[#0-9A-Fa-f]{4,7}$/', $wkw_options[$fieldname]) ) {
+							$wkw_options[$fieldname] = $options[$fieldname];
+						}
+						break;
+					case 'colouralpha':
+						/* make sure we have a hex value and opacity value */
+					    if ( ! preg_match('/^[#0-9A-Fa-f]{4,7}$/', $wkw_options[$fieldname]['hex']) || ((floatval($wkw_options[$fieldname]['op']) > 1) || (floatval($wkw_options[$fieldname]['op']) < 0)) ) {
+					    	$wkw_options[$fieldname] = $options[$fieldname];
+					    } else {
+					    	$rgb = self::hex2rgb($wkw_options[$fieldname]['hex']);
+					    	$op = floatval($wkw_options[$fieldname]['op']);
+					    	$wkw_options[$fieldname] = 'rgba(' . $rgb['red'] . ',' . $rgb['green'] . ',' . $rgb['blue'] . ',' . $op . ')';
+					    }
+					    break;
+					case 'opacity':
+						if ((floatval($wkw_options[$fieldname]) > 1) || (floatval($wkw_options[$fieldname]) < 0)) {
+							$wkw_options[$fieldname] = $options[$fieldname];
+						} else {
+							$wkw_options[$fieldname] = floatval($wkw_options[$fieldname]);
+						}
+					default:
+
+						break;
+				}
+			}
 		}
 		return $theme_options;
 	}
@@ -288,6 +408,53 @@ class p2_theme_options
 		$options = self::get_theme_options();
 		if (isset($options['google_analytics_id']) && trim($options['google_analytics_id']) != "") {
 			printf("<script>var _gaq=[['_setAccount','%S'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s)}(document,'script'));</script>", $options['google_analytics_id']);
+		}
+	}
+
+	/**
+	 * Convert a hexadecimal color code to its RGB equivalent
+	 *
+	 * @param string $hexStr (hexadecimal color value)
+	 * @param boolean $returnAsString (if set true, returns the value separated by the separator character. Otherwise returns associative array)
+	 * @param string $separator (to separate RGB values. Applicable only if second parameter is true.)
+	 * @return array or string (depending on second parameter. Returns False if invalid hex color value)
+	 */
+	function hex2RGB($hexStr, $returnAsString = false, $separator = ',')
+	{
+	    $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr);
+	    $rgbArray = array();
+	    if (strlen($hexStr) == 6) {
+	        $colorVal = hexdec($hexStr);
+	        $rgbArray['red'] = 0xFF & ($colorVal >> 0x10);
+	        $rgbArray['green'] = 0xFF & ($colorVal >> 0x8);
+	        $rgbArray['blue'] = 0xFF & $colorVal;
+	    } elseif (strlen($hexStr) == 3) {
+	        $rgbArray['red'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
+	        $rgbArray['green'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
+	        $rgbArray['blue'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
+	    } else {
+	        return false;
+	    }
+	    return $returnAsString ? implode($separator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
+	}
+
+	/**
+	 * Extract a HEX colour and opacity from rgba colour
+	 */
+	function rgba2hexop($rgbaStr)
+	{
+		if (preg_match('/rgba\(([0-9]+),([0-9]+),([0-9]+),([0-9\.]+)\)/', $rgbaStr, $matches)) {
+			$hexStr = '';
+			for ($i = 1; $i < 4; $i++) {
+				$hex = dechex($matches[$i]);
+				if (strlen($hex) == 1) {
+					$hex = "0" . $hex;
+				}
+				$hexStr .= $hex;
+			}
+			return array('hex' => '#' . $hexStr, 'op' => floatval($matches[4]));		
+		} else {
+			return array('hex' => '#000000', 'op' => 0.5);
 		}
 	}
 }
