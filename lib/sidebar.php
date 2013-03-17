@@ -1,42 +1,37 @@
 <?php
 /**
- * Determines whether or not to display the sidebar based on an array of conditional tags or page templates.
- *
- * If any of the is_* conditional tags or is_page_template(template_file) checks return true, the sidebar will NOT be displayed.
- *
- * @param array list of conditional tags (http://codex.wordpress.org/Conditional_Tags)
- * @param array list of page templates. These will be checked via is_page_template()
- *
- * @return boolean True will display the sidebar, False will not
- *
+ * Register sidebars and widgets
  */
-class Roots_Sidebar {
-  private $conditionals;
-  private $templates;
+if ( ! class_exists('p2_sidebar') ) :
 
-  public $display = true;
+class p2_sidebar
+{
+	public static function register()
+	{
+		add_action( 'widgets_init', array('p2_sidebar', 'register_sidebars') );
+	}
 
-  function __construct($conditionals = array(), $templates = array()) {
-    $this->conditionals = $conditionals;
-    $this->templates    = $templates;
+	public static function register_sidebars()
+	{
+		/* Sidebars */
+		register_sidebar(array(
+		'name'					=> __('Primary Sidebar', 'roots'),
+		'id'						=> 'sidebar-primary',
+		'before_widget' => '<section class="widget %1$s %2$s"><div class="widget-inner">',
+		'after_widget'	=> '</div></section>',
+		'before_title'	=> '<h3>',
+		'after_title'   => '</h3>',
+		));
+		register_sidebar(array(
+		'name'					=> __('Footer', 'roots'),
+		'id'						=> 'sidebar-footer',
+		'before_widget' => '<section class="widget %1$s %2$s"><div class="widget-inner">',
+		'after_widget'	=> '</div></section>',
+		'before_title'	=> '<h3>',
+		'after_title'	  => '</h3>',
+		));
 
-    $conditionals = array_map(array($this, 'check_conditional_tag'), $this->conditionals);
-    $templates    = array_map(array($this, 'check_page_template'), $this->templates);
-
-    if (in_array(true, $conditionals) || in_array(true, $templates)) {
-      $this->display = false;
-    }
-  }
-
-  private function check_conditional_tag($conditional_tag) {
-    if (is_array($conditional_tag)) {
-      return call_user_func_array($conditional_tag[0], $conditional_tag[1]);
-    } else {
-      return $conditional_tag();
-    }
-  }
-
-  private function check_page_template($page_template) {
-    return is_page_template($page_template);
-  }
+	}
 }
+p2_sidebar::register();
+endif;

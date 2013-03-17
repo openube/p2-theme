@@ -85,28 +85,6 @@ function p2_title() {
 	}
 }
 
-/**
- * Opposite of built in WP functions for trailing slashes
- */
-function leadingslashit($string) {
-	return '/' . unleadingslashit($string);
-}
-
-function unleadingslashit($string) {
-	return ltrim($string, '/');
-}
-
-function add_filters($tags, $function) {
-	foreach($tags as $tag) {
-		add_filter($tag, $function);
-	}
-}
-
-function is_element_empty($element) {
-	$element = trim($element);
-	return empty($element) ? false : true;
-}
-
 if ( ! class_exisits('p2_cleanup') ):
 /**
  * cleans up various bits and pieces in Wordpress

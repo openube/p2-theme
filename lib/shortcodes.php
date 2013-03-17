@@ -2,8 +2,11 @@
 /**
  * shortcode definitions and changes to the default Wordpress shortcodes
  */
-
-
+if ( ! class_exists('p2_shortcodes') ) :
+/**
+ * class used to add various shortcodes and content filters
+ * and modify those defined in wordpress
+ */
 class p2_shortcodes
 {
 	/* hokk into Wordpress */
@@ -136,5 +139,6 @@ class p2_shortcodes
 		$output .= '</ul>';
 		return $output;
 	}
-
 }
+p2_shortcodes::register();
+endif;
