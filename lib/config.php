@@ -69,7 +69,7 @@ class p2_theme_options
 						'type' => 'number',
 						'default' => '50'
 					),
-					'excerpt_length' => array(
+					'excerpt_more' => array(
 						'label' => '"Read more" link text',
 						'type' => 'text',
 						'default' => 'Read More&helli[p;'

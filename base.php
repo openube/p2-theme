@@ -18,11 +18,7 @@
       <div class="main" role="main">
         <?php include p2_template_path(); ?>
       </div><!-- /.main -->
-      <?php if (p2_display_sidebar()) : ?>
-      <aside class="sidebar <?php echo p2_sidebar_class(); ?>" role="complementary">
-        <?php include p2_sidebar_path(); ?>
-      </aside><!-- /.sidebar -->
-      <?php endif; ?>
+      <?php p2_sidebar::display(); ?>
     </div><!-- /.content -->
   </div><!-- /.wrap -->
 

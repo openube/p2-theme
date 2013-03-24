@@ -9,7 +9,7 @@ if ( ! class_exists('p2_shortcodes') ) :
  */
 class p2_shortcodes
 {
-	/* hokk into Wordpress */
+	/* hook into Wordpress */
 	public static function register()
 	{
 

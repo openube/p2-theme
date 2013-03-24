@@ -85,7 +85,7 @@ function p2_title() {
 	}
 }
 
-if ( ! class_exisits('p2_cleanup') ):
+if ( ! class_exists('p2_cleanup') ):
 /**
  * cleans up various bits and pieces in Wordpress
  */
@@ -323,7 +323,7 @@ class p2_cleanup
 	 *
 	 * @link http://txfx.net/wordpress-plugins/nice-search/
 	 */
-	public static function p2_nice_search_redirect()
+	public static function nice_search_redirect()
 	{
 		global $wp_rewrite;
 		if (!isset($wp_rewrite) || !is_object($wp_rewrite) || !$wp_rewrite->using_permalinks()) {

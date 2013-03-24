@@ -57,7 +57,7 @@ class p2_theme_setup
 		/* If we get this far, we have custom styles */
 		print('<style type="text/css">');
 		if ( ! empty( $header_image ) ) {
-			print('.site-header {background: url("%s") no-repeat scroll top;}', esc_url($header_image));
+			printf('.site-header {background: url("%s") no-repeat scroll top;}', esc_url($header_image));
 		}
 		if ( ! display_header_text() ) {
 			print('.site-title{display:none}');
@@ -77,10 +77,10 @@ class p2_theme_setup
 		}
 		print('}');
 		if ( ! display_header_text() ) {
-		    print('#headimg h1,#headimg h2{display:none;}')
+		    print('#headimg h1,#headimg h2{display:none;}');
 		}
 		print('#headimg h1{font: bold 60px/1 serif;margin: 0;padding: 58px 0 10px;}');
-		print('#headimg h1 a {text-decoration: none}';
+		print('#headimg h1 a {text-decoration: none}');
 		print('#headimg h1 a:hover {text-decoration: underline;}');
 		print('.default-header img {max-width: 230px;width: auto;}</style>');
 	}
