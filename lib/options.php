@@ -1,46 +1,64 @@
 <?php
 /**
  * Theme options
+ * @author Peter Edwards <Peter.Edwards@p-2.biz>
+ * @version 1.0
+ */
+
+if ( ! class_exists( 'p2_theme_options' ) ) :
+
+/**
+ * class to add options for the theme
+ * includes google analytics ID, global metadata and some aspects of the colour scheme
  */
 class p2_theme_options
 {
 	public static function register()
 	{
         /* add the wordpress theme options page */
-        add_action( 'admin_menu', array('p2_theme_options', 'add_options_page') );
+        add_action( 'admin_menu', array(__CLASS__, 'add_options_pages') );
         /* register settings */
-        add_action( 'admin_init', array('p2_theme_options', 'register_theme_options') );
+        add_action( 'admin_init', array(__CLASS__, 'register_theme_options') );
 
         /* Setup the Theme Customizer settings and controls */
-		add_action( 'customize_register' , array('p2_theme_options', 'register_customiser_settings' ) );
+		add_action( 'customize_register' , array(__CLASS__, 'register_customiser_settings' ) );
 		/* Output custom CSS for options */
-		add_action( 'wp_head' , array('p2_theme_options', 'print_css') );
+		add_action( 'wp_head', array(__CLASS__, 'wp_head') );
 		/* Add google analytics to the footer */
-		add_action('wp_footer', array('p2_theme_options', 'google_analytics'), 20);
+		add_action( 'wp_footer', array(__CLASS__, 'wp_footer'), 20);
 	}
 
 	/**
 	* add a submenu to the theme admin menu to access the theme options page
 	*/
-	public static function add_options_page() 
+	public static function add_options_pages() 
 	{
-		$theme_options_page = add_theme_page( 'Theme options', 'Theme options', 'manage_options', 'theme_options', array('p2_theme_options', 'theme_options_page') );
+		$theme_settings_page = add_theme_page( 'Theme options', 'Theme options', 'manage_options', 'theme_options', array(__CLASS__, 'theme_options_page') );
+		$theme_colours_page = add_theme_page( 'Theme colours', 'Theme colours', 'manage_options', 'theme_colours', array(__CLASS__, 'theme_colours_page') );
+	}
+
+	public static function theme_options_page()
+	{
+		self::theme_settings_page('theme_options');
+	}
+	public static function theme_colours_page()
+	{
+		self::theme_settings_page('theme_colours');
 	}
 
 	/**
-	 * creates the options page
+	 * creates the options pages
 	 */
-	public static function theme_options_page() 
+	public static function theme_settings_page($section) 
 	{
 		print ("<div class=\"wrap\"><div class=\"icon32\" id=\"icon-themes\"><br /></div><h2>Theme options</h2>");
 		if (isset($_REQUEST['settings-updated']) && $_REQUEST['settings-updated'] == "true") {
 			echo '<div id="message" class="updated"><p><strong>Settings saved.</strong></p></div>';
 		}
 		settings_errors('p2_options');
-		printf('</p><p>To see the images currently stored for names in the wiki, <a href="%s">visit the Image management page</a></p>', admin_url('themes.php?page=manage_names'));
-		print ('<form method="post" action="options.php">');
+		printf('<form method="post" action="options.php"><input type="hidden" name="dosection" value="%s" />', $section);
 		settings_fields('p2_options');
-		do_settings_sections('p2');
+		do_settings_sections($section);
         print(self::get_palette());
 		print ('<p><input type="submit" class="button-primary" name="submit" value="Save settings" /></p></form></div>');
 	}
@@ -66,13 +84,40 @@ class p2_theme_options
 					),
 					'excerpt_length' => array(
 						'label' => 'Length of Post excerpts',
-						'type' => 'number',
+						'type' => 'integer',
 						'default' => '50'
 					),
 					'excerpt_more' => array(
 						'label' => '"Read more" link text',
 						'type' => 'text',
-						'default' => 'Read More&helli[p;'
+						'default' => 'Read More&hellip;'
+					),
+					'use_custom_header' => array(
+						'label' => 'Use custom header?',
+						'type' => 'checkbox',
+						'default' => true
+					),
+					'use_custom_background' => array(
+						'label' => 'Use custom background?',
+						'type' => 'checkbox',
+						'default' => true
+					),
+					"use_boilerplate_htaccess" => array(
+						'label' => 'Use HTML5 boilerplate .htaccess rules?',
+						'type' => 'checkbox',
+						'default' => true
+					),
+					'global_keywords' => array(
+						'label' => 'Global keywords',
+						'type' => 'text',
+						'default' => '',
+						'description' => 'Enter keywords which will be used on all pages (sepaated by semicolons).'
+					),
+					'global_description' => array(
+						'label' => 'Global description',
+						'type' => 'textarea',
+						'default' => '',
+						'description' => 'Enter a description which will be used on all pages (when excerpts are blank)'
 					)
 				)
 			),
@@ -144,7 +189,7 @@ class p2_theme_options
 	public static function get_theme_options()
 	{
 		$customiser_fields = self::get_customisation_options();
-		$stored_options = get_option('p2_theme_options');
+		$stored_options = get_option('p2_options');
 		$options = array();
 		foreach ($customiser_fields as $cf) {
 			foreach ($cf['fields'] as $fieldname => $details) {
@@ -155,11 +200,14 @@ class p2_theme_options
 	}
 
 	/**
-	 * prints the CSS for the wp_head hook
+	 * prints output for the wp_head hook
 	 */
-	public static function print_css()
+	public static function wp_head()
 	{
+		global $post;
 		$options = self::get_theme_options();
+
+		/* custom CSS */
 		$out = '<!--Customizer CSS--><style type="text/css">';
 		$customiser_fields = self::get_customisation_options();
 		foreach ($customiser_fields as $cf) {
@@ -177,9 +225,18 @@ class p2_theme_options
 			}
 		}
 		$out .= '</style><!--/Customizer CSS-->';
+
+		/* metadata */
 		print($out);
 	}
 
+	/**
+	 * things to be placed in the page footer
+	 */
+	public static function wp_footer()
+	{
+
+	}
 	/**
 	 * returns an input containing the default colour palette
 	 */
@@ -205,7 +262,7 @@ class p2_theme_options
 			'p2_options',
 			'p2_options',
 			array(
-				'p2_theme_options',
+				__CLASS__,
 				'validate_theme_options'
 			)
 		);
@@ -215,10 +272,10 @@ class p2_theme_options
 				$cf['section'], 
 				$cf['title'], 
 				array(
-					'p2_theme_options',
+					__CLASS__,
 					'section_text'
 				), 
-				'wkw'
+				$cf['section']
 			);
 			foreach ($cf['fields'] as $fieldname => $details) {
 				$method = 'option_' . $details['type'];
@@ -226,10 +283,10 @@ class p2_theme_options
 					$fieldname,
 					$details['label'],
 					array(
-						'p2_theme_options',
+						__CLASS__,
 						$method
 					) ,
-					'p2',
+					$cf['section'],
 					$cf['section'],
 					array(
 						"field" => $fieldname,
@@ -257,11 +314,12 @@ class p2_theme_options
 		$settings = wp_parse_args($settings, array(
 			"length" => 60,
 			"class" => ''
-			));
+		));
+		$cls = ($settings["class"] == '')? '': ' class="' . $settings["class"] . '"';
 		$field = $fielddata["field"];
-		$len = (isset($fielddata["length"]) && intVal($fielddata["length"]) > 0) ? $fielddata["length"] : 60;
+		$len = (isset($settings["length"]) && intVal($settings["length"]) > 0) ? $settings["length"] : 60;
 		$option_value = (isset($options[$field]) && trim($options[$field]) != "") ? trim($options[$field]) : "";
-		printf('<input id="p2_options_%s" name="p2_options[%s]" type="text" value="%s" size="%s" />', $field, $field, $option_value, $len);
+		printf('<input id="p2_options_%s" name="p2_options[%s]" type="text" value="%s" size="%s"%s />', $field, $field, $option_value, $len, $cls);
 	}
 
 	/**
@@ -301,49 +359,72 @@ class p2_theme_options
 	}
 
 	/**
+	 * simple textarea field callback
+	 */
+	public static function option_checkbox($fielddata)
+	{
+		$options = self::get_theme_options();
+		$field = $fielddata["field"];
+		$desc = isset($fielddata["description"]) ? $fielddata["description"] : "";
+		$option_value = (isset($options[$field]) && $options[$field]) ? true : false;
+		$chckd = $option_value? ' checked="checked"': '';
+		printf('<input type="checkbox" id="p2_options_%s" name="p2_options[%s]"%s />%s', $field, $field, $chckd, $desc);
+	}
+
+	/**
+	 * simple input field callback
+	 */
+	public static function option_integer($fielddata, $settings = array())
+	{
+		$settings["length"] = 7;
+		$settings["class"] = 'integer';
+		self::option_text($fielddata, $settings);
+	}
+
+	/**
 	 * validate_wkw_options callback for checking option values
 	 */
 	public static function validate_theme_options($theme_options)
 	{
 		$customiser_fields = self::get_customisation_options();
 		$options = self::get_theme_options();
-		foreach ($customiser_fields as $cf) {
-			foreach ($cf['fields'] as $fieldname => $details) {
-				if ( ! isset($options[$fieldname]) ) {
-					$options[$fieldname] = $details['default'];
-				}
-				if ( !isset($wkw_options[$fieldname])) {
-					$wkw_options[$fieldname] = $options[$fieldname];
-				}
-				switch ($details['type']) {
-				    case 'colour':
-				        if ( ! preg_match('/^[#0-9A-Fa-f]{4,7}$/', $wkw_options[$fieldname]) ) {
-							$wkw_options[$fieldname] = $options[$fieldname];
-						}
-						break;
-					case 'colouralpha':
-						/* make sure we have a hex value and opacity value */
-					    if ( ! preg_match('/^[#0-9A-Fa-f]{4,7}$/', $wkw_options[$fieldname]['hex']) || ((floatval($wkw_options[$fieldname]['op']) > 1) || (floatval($wkw_options[$fieldname]['op']) < 0)) ) {
-					    	$wkw_options[$fieldname] = $options[$fieldname];
-					    } else {
-					    	$rgb = self::hex2rgb($wkw_options[$fieldname]['hex']);
-					    	$op = floatval($wkw_options[$fieldname]['op']);
-					    	$wkw_options[$fieldname] = 'rgba(' . $rgb['red'] . ',' . $rgb['green'] . ',' . $rgb['blue'] . ',' . $op . ')';
-					    }
-					    break;
-					case 'opacity':
-						if ((floatval($wkw_options[$fieldname]) > 1) || (floatval($wkw_options[$fieldname]) < 0)) {
-							$wkw_options[$fieldname] = $options[$fieldname];
-						} else {
-							$wkw_options[$fieldname] = floatval($wkw_options[$fieldname]);
-						}
-					default:
+		/* see whether we are validating settings or colours */
+		if (isset($theme_options["google_analytics_id"])) {
+			$fields = $customiser_fields[0]["fields"];
+		} else {
+			$fields = $customiser_fields[1]["fields"];
+		}
+		foreach ($fields as $fieldname => $details) {
+			switch ($details['type']) {
+				case 'checkbox':
+					$options[$fieldname] = isset($theme_options[$fieldname]);
+					break;
+				case 'integer':
+					$options[$fieldname] = intval($theme_options[$fieldname]);
+					break;
+			    case 'colour':
+			        if ( ! preg_match('/^[#0-9A-Fa-f]{4,7}$/', $theme_options[$fieldname]) ) {
+						$options[$fieldname] = $options[$fieldname];
+					}
+					break;
+				case 'colouralpha':
+					/* make sure we have a hex value and opacity value */
+				    if (preg_match('/^[#0-9A-Fa-f]{4,7}$/', $theme_options[$fieldname]['hex']) || ((floatval($theme_options[$fieldname]['op']) > 1) || (floatval($theme_options[$fieldname]['op']) < 0)) ) {
+				    	$rgb = self::hex2rgb($theme_options[$fieldname]['hex']);
+				    	$op = floatval($theme_options[$fieldname]['op']);
+				    	$options[$fieldname] = 'rgba(' . $rgb['red'] . ',' . $rgb['green'] . ',' . $rgb['blue'] . ',' . $op . ')';
+				    }
+				    break;
+				case 'opacity':
+					if ((floatval($theme_options[$fieldname]) > 0) && (floatval($theme_options[$fieldname]) < 1)) {
+						$options[$fieldname] = floatval($theme_options[$fieldname]);
+					}
+				default:
 
-						break;
-				}
+					break;
 			}
 		}
-		return $theme_options;
+		return $options;
 	}
 
 
@@ -376,19 +457,35 @@ class p2_theme_options
 					) 
 				);
 				/* define the control */
-				$wp_customize->add_control( 
-					new WP_Customize_Color_Control(
-						$wp_customize,
-						$cf['section'] . '_' . $fieldname,
-						array(
-							'label' => $details['label'],
-							'section' => $cf['section'],
-							'settings' => $cf['section'] . '[' . $fieldname . ']',
-							'priority' => $priority		
-						) 
-					)
-				);
-				$priority++;
+				if ($details["type"] == "colour") {
+					$wp_customize->add_control( 
+						new WP_Customize_Color_Control(
+							$wp_customize,
+							$cf['section'] . '_' . $fieldname,
+							array(
+								'label' => $details['label'],
+								'section' => $cf['section'],
+								'settings' => $cf['section'] . '[' . $fieldname . ']',
+								'priority' => $priority		
+							) 
+						)
+					);
+					$priority++;
+				} elseif ($details["type"] == "text") {
+					$wp_customize->add_control( 
+						new WP_Customize_Control(
+							$wp_customize,
+							$cf['section'] . '_' . $fieldname,
+							array(
+								'label' => $details['label'],
+								'section' => $cf['section'],
+								'settings' => $cf['section'] . '[' . $fieldname . ']',
+								'priority' => $priority		
+							) 
+						)
+					);
+					$priority++;
+				}
 			}
 		}
 		/* make some stuff use live preview JS */
@@ -459,3 +556,4 @@ class p2_theme_options
 	}
 }
 p2_theme_options::register();
+endif;

@@ -16,13 +16,10 @@
   <div class="wrap container" role="document">
     <div class="content row">
       <div class="main" role="main">
-        <?php include p2_template_path(); ?>
+        <?php include p2::template_path(); ?>
       </div><!-- /.main -->
-      <?php p2_sidebar::display(); ?>
+      <?php p2::display_sidebar(); ?>
     </div><!-- /.content -->
   </div><!-- /.wrap -->
 
-  <?php get_template_part('templates/footer'); ?>
-
-</body>
-</html>
+<?php get_template_part('templates/footer'); ?>

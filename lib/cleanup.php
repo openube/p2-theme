@@ -1,89 +1,9 @@
 <?php
 /**
- * Theme wrapper
- *
- * @link http://scribu.net/wordpress/theme-wrappers.html
+ * Wordpress cleanup
+ * @author Peter Edwards <Peter.Edwards@p-2.biz>
+ * @version 1.0
  */
-function p2_template_path() {
-	return p2_Wrapping::$main_template;
-}
-
-function p2_sidebar_path() {
-	return p2_Wrapping::sidebar();
-}
-
-class p2_Wrapping {
-	// Stores the full path to the main template file
-	static $main_template;
-
-	// Stores the base name of the template file; e.g. 'page' for 'page.php' etc.
-	static $base;
-
-	static function wrap($template) {
-		self::$main_template = $template;
-
-		self::$base = substr(basename(self::$main_template), 0, -4);
-
-		if (self::$base === 'index') {
-			self::$base = false;
-		}
-
-		$templates = array('base.php');
-
-		if (self::$base) {
-			array_unshift($templates, sprintf('base-%s.php', self::$base));
-		}
-
-		return locate_template($templates);
-	}
-
-	static function sidebar() {
-		$templates = array('templates/sidebar.php');
-
-		if (self::$base) {
-			array_unshift($templates, sprintf('templates/sidebar-%s.php', self::$base));
-		}
-
-		return locate_template($templates);
-	}
-}
-add_filter('template_include', array('p2_Wrapping', 'wrap'), 99);
-
-/**
- * Page titles
- */
-function p2_title() {
-	if (is_home()) {
-		if (get_option('page_for_posts', true)) {
-			echo get_the_title(get_option('page_for_posts', true));
-		} else {
-			print('Latest Posts');
-		}
-	} elseif (is_archive()) {
-		$term = get_term_by('slug', get_query_var('term'), get_query_var('taxonomy'));
-		if ($term) {
-			echo $term->name;
-		} elseif (is_post_type_archive()) {
-			echo get_queried_object()->labels->name;
-		} elseif (is_day()) {
-			printf('Daily Archives: %s', get_the_date());
-		} elseif (is_month()) {
-			printf('Monthly Archives: %s', get_the_date('F Y'));
-		} elseif (is_year()) {
-			printf('Yearly Archives: %s', get_the_date('Y'));
-		} elseif (is_author()) {
-			printf('Author Archives: %s', get_the_author());
-		} else {
-			single_cat_title();
-		}
-	} elseif (is_search()) {
-		printf('Search Results for %s', get_search_query());
-	} elseif (is_404()) {
-		print('Not Found');
-	} else {
-		the_title();
-	}
-}
 
 if ( ! class_exists('p2_cleanup') ):
 /**
@@ -95,41 +15,41 @@ class p2_cleanup
 	public static function register()
 	{
 		/* Clean up wp_head() */
-		add_action( 'init', array('p2_cleanup', 'head_cleanup') );
+		add_action( 'init', array(__CLASS__, 'head_cleanup') );
 		/* Remove the WordPress version from RSS feeds */
 		add_filter( 'the_generator', '__return_false' );
 		/* Clean up language_attributes() used in <html> tag */
-		add_filter( 'language_attributes', array('p2_cleanup', 'language_attributes') );
+		add_filter( 'language_attributes', array(__CLASS__, 'language_attributes') );
 		/* clean up CSS link tags */
-		add_filter( 'style_loader_tag', array('p2_cleanup', 'style_tag') );
+		add_filter( 'style_loader_tag', array(__CLASS__, 'style_tag') );
 		/* filter body classes */
-		add_filter( 'body_class', array('p2_cleanup', 'body_class') );
+		add_filter( 'body_class', array(__CLASS__, 'body_class') );
 		/* wrap object embeds */
-		add_filter( 'embed_oembed_html', array('p2_cleanup', 'embed_wrap'), 10, 4 );
-		add_filter( 'embed_googlevideo', array('p2_cleanup', 'embed_wrap'), 10, 2 );
+		add_filter( 'embed_oembed_html', array(__CLASS__, 'embed_wrap'), 10, 4 );
+		add_filter( 'embed_googlevideo', array(__CLASS__, 'embed_wrap'), 10, 2 );
 		/* add t=humbnail class */
-		add_filter( 'wp_get_attachment_link', array('p2_cleanup', 'attachment_link_class'), 10, 1);
+		add_filter( 'wp_get_attachment_link', array(__CLASS__, 'attachment_link_class'), 10, 1);
 		/* remove dashboard widgets */
-		add_action( 'admin_init', array('p2_cleanup', 'remove_dashboard_widgets') );
+		add_action( 'admin_init', array(__CLASS__, 'remove_dashboard_widgets') );
 		/* clean up excerpts */
-		add_filter( 'excerpt_length', array('p2_cleanup', 'excerpt_length') );
-		add_filter( 'excerpt_more', array('p2_cleanup', 'excerpt_more') );
+		add_filter( 'excerpt_length', array(__CLASS__, 'excerpt_length') );
+		add_filter( 'excerpt_more', array(__CLASS__, 'excerpt_more') );
 		/* remove self-closing tags */
-		add_filter( 'get_avatar', array('p2_cleanup', 'remove_self_closing_tags') );
-		add_filter( 'comment_id_fields', array('p2_cleanup', 'remove_self_closing_tags') );
-		add_filter( 'post_thumbnail_html', array('p2_cleanup', 'remove_self_closing_tags') );
+		add_filter( 'get_avatar', array(__CLASS__, 'remove_self_closing_tags') );
+		add_filter( 'comment_id_fields', array(__CLASS__, 'remove_self_closing_tags') );
+		add_filter( 'post_thumbnail_html', array(__CLASS__, 'remove_self_closing_tags') );
 		/* remove blog description */
-		add_filter( 'get_bloginfo_rss', array('p2_cleanup', 'remove_default_description') );
+		add_filter( 'get_bloginfo_rss', array(__CLASS__, 'remove_default_description') );
 		/* allow iframes in tinyMCE	*/
-		//add_filter( 'tiny_mce_before_init', array('p2_cleanup', 'change_mce_options') );
+		//add_filter( 'tiny_mce_before_init', array(__CLASS__, 'change_mce_options') );
 		/* add first and last classes on widgets */
-		add_filter( 'dynamic_sidebar_params', array('p2_cleanup', 'widget_first_last_classes') );
+		add_filter( 'dynamic_sidebar_params', array(__CLASS__, 'widget_first_last_classes') );
 		/* nice search URLs */
-		add_action( 'template_redirect', array('p2_cleanup','nice_search_redirect') );
+		add_action( 'template_redirect', array(__CLASS__,'nice_search_redirect') );
 		/* search request filter */
-		add_filter( 'request', array('p2_cleanup', 'request_filter') );
+		add_filter( 'request', array(__CLASS__, 'request_filter') );
 		/* search form template */
-		add_filter( 'get_search_form', array('p2_cleanup', 'get_search_form') );
+		add_filter( 'get_search_form', array(__CLASS__, 'get_search_form') );
 	}
 
 	/**
@@ -258,7 +178,7 @@ class p2_cleanup
 	/**
 	 * Remove unnecessary self-closing tags
 	 */
-	public static function p2_remove_self_closing_tags($input)
+	public static function remove_self_closing_tags($input)
 	{
 		return str_replace(' />', '>', $input);
 	}

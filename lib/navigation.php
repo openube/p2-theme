@@ -1,16 +1,60 @@
 <?php
+/**
+ * Navigation and sidebar setup
+ * @author Peter Edwards <Peter.Edwards@p-2.biz>
+ * @version 1.0
+ */
 
-if ( ! class_exists('p2_navigation')) :
+if ( ! class_exists( 'p2_navigation' )) :
 
 class p2_navigation
 {
 	public static function register()
 	{
-		add_filter( 'nav_menu_css_class', array('p2_navigation', 'nav_menu_css_class'), 10, 2 );
+		/* register menus */
+		add_action( 'after_setup_theme', array(__CLASS__, 'register_nav_menus') );
+		/* register sidebars */
+		add_action( 'widgets_init', array(__CLASS__, 'register_sidebars') );
+		/* tidy up menu generation */
+		add_filter( 'nav_menu_css_class', array(__CLASS__, 'nav_menu_css_class'), 10, 2 );
 		add_filter( 'nav_menu_item_id', '__return_null' );
-		add_filter( 'wp_nav_menu_args', array('p2_navigation', 'nav_menu_args') );
-
+		add_filter( 'wp_nav_menu_args', array(__CLASS__, 'nav_menu_args') );
 	}
+
+	/**
+	 * Registers navigation menus
+	 */
+	public static function register_nav_menus()
+	{
+		register_nav_menus(array(
+			'footer_navigation' => 'Footer Navigation'
+		));
+	}
+
+	/**
+	 * Registers sidebars
+	 */
+	public static function register_sidebars()
+	{
+		/* Sidebars */
+		register_sidebar(array(
+			'name'			=> 'Posts Sidebar',
+			'id'			=> 'sidebar-posts',
+			'before_widget' => '<section class="posts-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
+			'after_widget'	=> '</div></section>',
+			'before_title'	=> '<h3>',
+			'after_title'   => '</h3>',
+		));
+		register_sidebar(array(
+			'name'			=> 'Pages sidebar',
+			'id'			=> 'sidebar-pages',
+			'before_widget' => '<section class="pages-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
+			'after_widget'	=> '</div></section>',
+			'before_title'	=> '<h3>',
+			'after_title'	=> '</h3>',
+		));
+	}
+
 	/**
 	 * Remove the id="" on nav menu items
 	 * Return 'menu-slug' for nav menu classes
