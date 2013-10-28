@@ -34,7 +34,7 @@ class p2
 	 * registers all the methiods of the class with the Wordpress API
 	 * and adds support for different features in the theme
 	 */
-	function register() {
+	public static function register() {
 
 		/* get the theme options */
 		$options = p2_theme_options::get_theme_options();
