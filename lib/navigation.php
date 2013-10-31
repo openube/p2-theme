@@ -27,6 +27,8 @@ class p2_navigation
 	public static function register_nav_menus()
 	{
 		register_nav_menus(array(
+			'top_navigation' => 'Top navigation (above header)',
+			'header_navigation' => 'Top navigation (below header)',
 			'footer_navigation' => 'Footer Navigation'
 		));
 	}
@@ -38,8 +40,18 @@ class p2_navigation
 	{
 		/* Sidebars */
 		register_sidebar(array(
+			'name'			=> 'Global Sidebar',
+			'description'	=> 'Sidebar added to all pages and posts on the site',
+			'id'			=> 'global-sidebar',
+			'before_widget' => '<section class="global-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
+			'after_widget'	=> '</div></section>',
+			'before_title'	=> '<h3>',
+			'after_title'   => '</h3>',
+		));
+		register_sidebar(array(
 			'name'			=> 'Posts Sidebar',
-			'id'			=> 'sidebar-posts',
+			'description'	=> 'Sidebar added posts and post archives',
+			'id'			=> 'posts-sidebar',
 			'before_widget' => '<section class="posts-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
 			'after_widget'	=> '</div></section>',
 			'before_title'	=> '<h3>',
@@ -47,8 +59,18 @@ class p2_navigation
 		));
 		register_sidebar(array(
 			'name'			=> 'Pages sidebar',
-			'id'			=> 'sidebar-pages',
+			'description'	=> 'Sidebar added to pages',
+			'id'			=> 'pages-sidebar',
 			'before_widget' => '<section class="pages-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
+			'after_widget'	=> '</div></section>',
+			'before_title'	=> '<h3>',
+			'after_title'	=> '</h3>',
+		));
+		register_sidebar(array(
+			'name'			=> 'Footer sidebar',
+			'description'	=> 'Sidebar added to footer above footer menu',
+			'id'			=> 'footer-sidebar',
+			'before_widget' => '<section class="footer-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
 			'after_widget'	=> '</div></section>',
 			'before_title'	=> '<h3>',
 			'after_title'	=> '</h3>',
