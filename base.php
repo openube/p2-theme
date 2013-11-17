@@ -5,20 +5,15 @@
 
   <?php
     do_action('get_header');
-    // Use Bootstrap's navbar if enabled in config.php
-    if (current_theme_supports('bootstrap-top-navbar')) {
-      get_template_part('templates/header-top-navbar');
-    } else {
-      get_template_part('templates/header');
-    }
+    get_template_part('templates/header');
   ?>
 
-  <div class="wrap container" role="document">
+  <div class="container" role="document">
     <div class="content row">
-      <div class="main" role="main">
+      <div class="main <?php echo p2::column_classes(); ?>" role="main">
         <?php include p2::template_path(); ?>
       </div><!-- /.main -->
-      <?php p2::display_sidebar(); ?>
+      <?php p2::display_sidebars(); ?>
     </div><!-- /.content -->
   </div><!-- /.wrap -->
 

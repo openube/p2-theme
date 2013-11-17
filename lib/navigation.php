@@ -27,8 +27,8 @@ class p2_navigation
 	public static function register_nav_menus()
 	{
 		register_nav_menus(array(
-			'top_navigation' => 'Top navigation (above header)',
-			'header_navigation' => 'Top navigation (below header)',
+			'top_navigation' => 'Top navigation (fixed above header)',
+			'header_navigation' => 'Top navigation (static below header)',
 			'footer_navigation' => 'Footer Navigation'
 		));
 	}
@@ -81,7 +81,7 @@ class p2_navigation
 	 * Remove the id="" on nav menu items
 	 * Return 'menu-slug' for nav menu classes
 	 */
-	function nav_menu_css_class($classes, $item)
+	public static function nav_menu_css_class($classes, $item)
 	{
 		$slug = sanitize_title($item->title);
 		$classes = preg_replace('/(current(-menu-|[-_]page[-_])(item|parent|ancestor))/', 'active', $classes);
@@ -91,7 +91,7 @@ class p2_navigation
 
 		$classes = array_unique($classes);
 
-		return array_filter($classes, 'is_element_empty');
+		return array_filter($classes, array(__CLASS__, 'is_element_empty'));
 	}
 
 	/**
@@ -100,7 +100,7 @@ class p2_navigation
 	 * Remove the container
 	 * Use p2_Nav_Walker() by default
 	 */
-	function nav_menu_args($args = '')
+	public static function nav_menu_args($args = '')
 	{
 		$nav_menu_args['container'] = false;
 		if (!$args['items_wrap']) {
@@ -111,6 +111,15 @@ class p2_navigation
 			$nav_menu_args['walker'] = new p2_Nav_Walker();
 		}
 		return array_merge($args, $nav_menu_args);
+	}
+
+	/**
+	 * array_filter callback to identify empty elements
+	 */
+	public static function is_element_empty($element)
+	{
+		$element = trim($element);
+		return empty($element) ? false : true;
 	}
 }
 p2_navigation::register();
@@ -175,4 +184,3 @@ class p2_Nav_Walker extends Walker_Nav_Menu
 		parent::display_element($element, $children_elements, $max_depth, $depth, $args, $output);
 	}
 }
-

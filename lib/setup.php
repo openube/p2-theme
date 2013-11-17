@@ -153,19 +153,75 @@ class p2
 	}
 
 	/**
-	 * displays posts or page sidebar
+	 * test to see if any sidebars have been configured
 	 */
-	public static function display_sidebar()
+	public static function has_sidebars($which = "any")
 	{
-		if (is_page() && is_active_sidebar('sidebar-pages')) {
-			print('<aside class="sidebar sidebar-pages" role="complementary">');
-			dynamic_sidebar('sidebar-pages');
-			print('</aside>');
+		switch($which) {
+			case "pages":
+				return (is_page() && is_active_sidebar('pages-sidebar'));
+				break;
+			case "posts":
+				return ((is_single() || is_archive()) && is_active_sidebar('posts-sidebar'));
+				break;
+			case "global":
+				return (is_active_sidebar('global-sidebar'));
+				break;
+			case "nonglobal":
+				return (self::has_sidebars("pages") || self::has_sidebars("posts"));
+				break;
+			case "both":
+				return (self::has_sidebars("global") && self::has_sidebars("nonglobal"));
+				break;
+			case "single":
+				$has_global = self::has_sidebars("global");
+				$has_nonglobal = self::has_sidebars("nonglobal");
+				return (($has_global && !$has_nonglobal) || (!$has_global && $has_nonglobal));
+			case "any":
+			default:
+				return (self::has_sidebars("global") || self::has_sidebars("nonglobal"));
+				break;
 		}
-		if ((is_single() || is_archive()) && is_active_sidebar('sidebar-posts')) {
-			print('<aside class="sidebar sidebar-posts" role="complementary">');
-			dynamic_sidebar('sidebar-posts');
-			print('</aside>');
+	}
+
+	/**
+	 * prints column classes dependent on how many sidebars there are
+	 */
+	public static function column_classes($sidebar = false)
+	{
+		$classes = "";
+		if (self::has_sidebars('both')) {
+			$classes .= $sidebar? 'col-lg-6 col-sm-4': 'col-lg-6 col-sm-8';
+		} elseif (self::has_sidebars('single')) {
+			$classes .= $sidebar? 'col-sm-4': 'col-sm-8';
+		} else {
+			$classes .= $sidebar? '': 'col-lg-12 col-md-12 col-sm-12 col-xs-12';
+		}
+		return $classes;
+	}
+
+	/**
+	 * displays global, posts or page sidebar
+	 */
+	public static function display_sidebars()
+	{
+		if (self::has_sidebars()) {
+			printf('<div class="sidebar %s" role="complimentary">', self::column_classes(true));
+			if (is_active_sidebar('global-sidebar')) {
+				print('<div class="global-sidebar pull-right col-lg-6" role="complimentary">');
+				dynamic_sidebar('global-sidebar');
+				print('</div>');
+			}
+			if (is_page() && is_active_sidebar('pages-sidebar')) {
+				print('<div class="sidebar pages-sidebar pull-right col-lg-6" role="complementary">');
+				dynamic_sidebar('pages-sidebar');
+				print('</div>');
+			} else if ((is_single() || is_archive()) && is_active_sidebar('posts-sidebar')) {
+				print('<div class="sidebar posts-sidebar pull-right col-lg-6" role="complementary">');
+				dynamic_sidebar('posts-sidebar');
+				print('</div>');
+			}
+			print('</div>');
 		}
 	}
 
@@ -175,19 +231,16 @@ class p2
 	public static function header_style()
 	{
 		$header_image = get_header_image();
-		$text_color   = get_header_textcolor();
-		/* If no custom options for text are set, let's bail. */
-		if ( empty( $header_image ) && $text_color == get_theme_support( 'custom-header', 'default-text-color' ) ) {
-			return;
-		}
-		/* If we get this far, we have custom styles */
+		$text_colour   = get_header_textcolor();
 		print('<style type="text/css">');
 		if ( ! empty( $header_image ) ) {
-			printf('.site-header {background: url("%s") no-repeat scroll top;}', esc_url($header_image));
+			printf('#site-header{background: url(%s) no-repeat scroll top center;height:%spx;}', esc_url($header_image), get_custom_header()->height);
 		}
-		if ( ! display_header_text() ) {
-			print('.site-title{display:none}');
+		if (has_nav_menu('top_navigation')) {
+			printf('#site-header{margin-top:50px}');
 		}
+		$disp = display_header_text()? '': 'display:none;';
+		printf('#site-header a{color:#%s;%s}', $text_colour, $disp);
 		print('</style>');
 	}
 

@@ -6,9 +6,10 @@
  * @author Peter Edwards <Peter.Edwards@p-2.biz>
  * @version 1.0
  */
-require_once locate_template('/lib/options.php');		/* Configuration options */
-require_once locate_template('/lib/cleanup.php');		/* cleanup functions */
-require_once locate_template('/lib/setup.php');			/* Theme setup */
-require_once locate_template('/lib/navigation.php');	/* Navigation definitions and mods */
-require_once locate_template('/lib/comments.php');		/* Custom comments mods */
-require_once locate_template('/lib/scripts.php');		/* Scripts and stylesheets */
+
+locate_template('lib/options.php', true, true);		/* Configuration options */
+locate_template('lib/cleanup.php', true, true);		/* cleanup functions */
+locate_template('lib/setup.php', true, true);		/* Theme setup */
+locate_template('lib/navigation.php', true, true);	/* Navigation definitions and mods */
+locate_template('lib/comments.php', true, true);	/* Custom comments mods */
+locate_template('lib/scripts.php', true, true);		/* Scripts and stylesheets */

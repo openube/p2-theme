@@ -37,6 +37,10 @@ class p2_theme_options
 		$theme_colours_page = add_theme_page( 'Theme colours', 'Theme colours', 'manage_options', 'theme_colours', array(__CLASS__, 'theme_colours_page') );
 	}
 
+	/**
+	 * callbacks for options pges
+	 * both use a generic method to output options in different sections
+	 */
 	public static function theme_options_page()
 	{
 		self::theme_settings_page('theme_options');
@@ -47,7 +51,7 @@ class p2_theme_options
 	}
 
 	/**
-	 * creates the options pages
+	 * creates the options page
 	 */
 	public static function theme_settings_page($section) 
 	{
@@ -56,7 +60,7 @@ class p2_theme_options
 			echo '<div id="message" class="updated"><p><strong>Settings saved.</strong></p></div>';
 		}
 		settings_errors('p2_options');
-		printf('<form method="post" action="options.php"><input type="hidden" name="dosection" value="%s" />', $section);
+		printf('<form method="post" action="options.php"><input type="hidden" name="p2-section" value="%s" />', $section);
 		settings_fields('p2_options');
 		do_settings_sections($section);
         print(self::get_palette());
@@ -101,6 +105,11 @@ class p2_theme_options
 						'label' => 'Use custom background?',
 						'type' => 'checkbox',
 						'default' => true
+					),
+					'use_post_formats' => array(
+						'label' => 'Use post formats?',
+						'type' => 'checkbox',
+						'default' => false
 					),
 					"use_boilerplate_htaccess" => array(
 						'label' => 'Use HTML5 boilerplate .htaccess rules?',
@@ -437,18 +446,23 @@ class p2_theme_options
 		$customiser_fields = self::get_customisation_options();
 		foreach ($customiser_fields as $cf) {
 			/* Define a new section to the Theme Customizer */
-			$wp_customize->add_section( $cf['section'],
-				array(
-					'title' => $cf['title'],
-					'priority' => $cf['priority'], 
-					'capability' => $cf['capability'],
-					'description' => $cf['description']
-				)
-			);
+			if ($cf['section'] == "theme_colours") {
+				$section = "colors";
+			} else {
+				$section = $cf['section'];
+				$wp_customize->add_section( $cf['section'],
+					array(
+						'title' => $cf['title'],
+						'priority' => $cf['priority'], 
+						'capability' => $cf['capability'],
+						'description' => $cf['description']
+					)
+				);
+			}
 			$priority = 1;
 			foreach ($cf['fields'] as $fieldname => $details) {
 				/* Register new settings to the WP database */
-				$wp_customize->add_setting( $cf['section'] . '[' . $fieldname . ']',
+				$wp_customize->add_setting( $section . '[' . $fieldname . ']',
 					array(
 						'default' => $details['default'],
 						'type' => 'option',
@@ -461,11 +475,11 @@ class p2_theme_options
 					$wp_customize->add_control( 
 						new WP_Customize_Color_Control(
 							$wp_customize,
-							$cf['section'] . '_' . $fieldname,
+							$section . '_' . $fieldname,
 							array(
 								'label' => $details['label'],
-								'section' => $cf['section'],
-								'settings' => $cf['section'] . '[' . $fieldname . ']',
+								'section' => $section,
+								'settings' => $section . '[' . $fieldname . ']',
 								'priority' => $priority		
 							) 
 						)
@@ -475,11 +489,11 @@ class p2_theme_options
 					$wp_customize->add_control( 
 						new WP_Customize_Control(
 							$wp_customize,
-							$cf['section'] . '_' . $fieldname,
+							$section . '_' . $fieldname,
 							array(
 								'label' => $details['label'],
-								'section' => $cf['section'],
-								'settings' => $cf['section'] . '[' . $fieldname . ']',
+								'section' => $section,
+								'settings' => $section . '[' . $fieldname . ']',
 								'priority' => $priority		
 							) 
 						)
