@@ -21,7 +21,10 @@ class p2_theme_options
         add_action( 'admin_init', array(__CLASS__, 'register_theme_options') );
 
         /* Setup the Theme Customizer settings and controls */
-		add_action( 'customize_register' , array(__CLASS__, 'register_customiser_settings' ) );
+		add_action( 'customize_register', array(__CLASS__, 'register_customiser_settings' ) );
+		/* Setup the theme customiser live preview */
+		add_action( 'customize_preview_init', array(__CLASS__, 'register_customiser_script' ) );
+
 		/* Output custom CSS for options */
 		add_action( 'wp_head', array(__CLASS__, 'wp_head') );
 		/* Add google analytics to the footer */
@@ -77,6 +80,7 @@ class p2_theme_options
 			array(
 				'section' => 'theme_options',
 				'title' => 'Theme Options',
+				'customiser' => false,
 				'priority' => 35, 
 				'capability' => 'edit_theme_options',
 				'description' => 'Allows you to customize site options.',
@@ -133,22 +137,18 @@ class p2_theme_options
 			array(
 				'section' => 'theme_colours',
 				'title' => 'Theme Colours',
+				'customiser' => true,
+				'customiser_section' => 'colors',
 				'priority' => 36, 
 				'capability' => 'edit_theme_options',
 				'description' => 'Allows you to customize site colours.',
 				'fields' => array(
-					'background_colour' => array(
-						'label' => 'Background colour',
-						'type' => 'colour',
-						'default' => '#ffffff',
-						'selector' => 'html,body',
-						'rules' => '{background-color:%s}'
-					),
 					'text_colour' => array(
 						'label' => 'Text colour',
 						'type' => 'colour',
 						'default' => '#000000',
 						'selector' => 'html,body',
+						'customiser' => true,
 						'rules' => '{color:%s}'
 					),
 					'heading_colour' => array(
@@ -156,12 +156,14 @@ class p2_theme_options
 						'type' => 'colour',
 						'default' => '#0000ff',
 						'selector' => 'h1,h2,h3,h4,h5,h6',
+						'customiser' => true,
 						'rules' => '{color:%s}'
 					),
 					'link_colour' => array(
 						'label' => 'Link colour',
 						'type' => 'colour',
 						'default' => '#0000cc',
+						'customiser' => true,
 						'selector' => 'a',
 						'rules' => '{color:%s}'
 					),
@@ -446,69 +448,79 @@ class p2_theme_options
 		$customiser_fields = self::get_customisation_options();
 		foreach ($customiser_fields as $cf) {
 			/* Define a new section to the Theme Customizer */
-			if ($cf['section'] == "theme_colours") {
-				$section = "colors";
-			} else {
-				$section = $cf['section'];
-				$wp_customize->add_section( $cf['section'],
-					array(
-						'title' => $cf['title'],
-						'priority' => $cf['priority'], 
-						'capability' => $cf['capability'],
-						'description' => $cf['description']
-					)
-				);
-			}
-			$priority = 1;
-			foreach ($cf['fields'] as $fieldname => $details) {
-				/* Register new settings to the WP database */
-				$wp_customize->add_setting( $section . '[' . $fieldname . ']',
-					array(
-						'default' => $details['default'],
-						'type' => 'option',
-						'capability' => 'edit_theme_options',
-						'transport' => 'postMessage'
-					) 
-				);
-				/* define the control */
-				if ($details["type"] == "colour") {
-					$wp_customize->add_control( 
-						new WP_Customize_Color_Control(
-							$wp_customize,
-							$section . '_' . $fieldname,
-							array(
-								'label' => $details['label'],
-								'section' => $section,
-								'settings' => $section . '[' . $fieldname . ']',
-								'priority' => $priority		
-							) 
+			if ($cf['customiser']) {
+				if (isset($cf['customiser_section'])) {
+					$section = $cf['customiser_section'];
+				} else {
+					$section = $cf['section'];
+					$wp_customize->add_section( $cf['section'],
+						array(
+							'title' => $cf['title'],
+							'priority' => $cf['priority'], 
+							'capability' => $cf['capability'],
+							'description' => $cf['description']
 						)
 					);
-					$priority++;
-				} elseif ($details["type"] == "text") {
-					$wp_customize->add_control( 
-						new WP_Customize_Control(
-							$wp_customize,
-							$section . '_' . $fieldname,
+				}
+				$priority = 1;
+				foreach ($cf['fields'] as $fieldname => $details) {
+					if (isset($details['customiser']) && $details['customiser']) {
+						/* Register new settings to the WP database */
+						$wp_customize->add_setting( $section . '[' . $fieldname . ']',
 							array(
-								'label' => $details['label'],
-								'section' => $section,
-								'settings' => $section . '[' . $fieldname . ']',
-								'priority' => $priority		
+								'default' => $details['default'],
+								'type' => 'option',
+								'capability' => 'edit_theme_options',
+								'transport' => 'postMessage'
 							) 
-						)
-					);
-					$priority++;
+						);
+						/* define the control */
+						if ($details["type"] == "colour") {
+							$wp_customize->add_control( 
+								new WP_Customize_Color_Control(
+									$wp_customize,
+									$section . '_' . $fieldname,
+									array(
+										'label' => $details['label'],
+										'section' => $section,
+										'settings' => $section . '[' . $fieldname . ']',
+										'priority' => $priority		
+									) 
+								)
+							);
+							$priority++;
+						} elseif ($details["type"] == "text") {
+							$wp_customize->add_control( 
+								new WP_Customize_Control(
+									$wp_customize,
+									$section . '_' . $fieldname,
+									array(
+										'label' => $details['label'],
+										'section' => $section,
+										'settings' => $section . '[' . $fieldname . ']',
+										'priority' => $priority		
+									) 
+								)
+							);
+							$priority++;
+						}
+					}
 				}
 			}
 		}
 		/* make some stuff use live preview JS */
 		$wp_customize->get_setting( 'blogname' )->transport = 'postMessage';
-		$wp_customize->get_setting( 'blogdescription' )->transport = 'postMessage';
 		$wp_customize->get_setting( 'header_textcolor' )->transport = 'postMessage';
 		$wp_customize->get_setting( 'background_color' )->transport = 'postMessage';
 	}
 
+	/**
+	 * enqueues the script to enable real-time customisation of theme options
+	 */
+	public static function register_customiser_script()
+	{
+		wp_enqueue_script('p2_customiser_script', get_template_directory_uri() . '/js/customiser.js', array( 'jquery','customize-preview' ), p2::$version, true );
+	}
 
 	/**
 	 * add the google analytics to the page footer if the option has been configured
