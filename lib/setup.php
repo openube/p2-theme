@@ -39,6 +39,9 @@ class p2
 		/* get the theme options */
 		$options = p2_theme_options::get_theme_options();
 
+		// Make theme available for translation
+		load_theme_textdomain('p2', get_template_directory() . '/lang');
+
 		// Add post thumbnails (http://codex.wordpress.org/Post_Thumbnails)
 		add_theme_support('post-thumbnails');
 		// set_post_thumbnail_size(150, 150, false);
@@ -88,7 +91,8 @@ class p2
 	 * @link http://scribu.net/wordpress/theme-wrappers.html
 	 * called with the template_include filter
 	 */
-	public static function wrap($template) {
+	public static function wrap($template)
+	{
 		self::$main_template = $template;
 
 		self::$base = substr(basename(self::$main_template), 0, -4);
@@ -109,7 +113,8 @@ class p2
 	/**
 	 * getter for template path
 	 */
-	public static function template_path() {
+	public static function template_path()
+	{
 		return self::$main_template;
 	}
 
