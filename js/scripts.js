@@ -1,5 +1,5 @@
 /* ========================================================================
- * Bootstrap: affix.js v3.0.1
+ * Bootstrap: affix.js v3.0.2
  * http://getbootstrap.com/javascript/#affix
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -123,9 +123,9 @@
     })
   })
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: alert.js v3.0.1
+ * Bootstrap: alert.js v3.0.2
  * http://getbootstrap.com/javascript/#alerts
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -221,9 +221,9 @@
 
   $(document).on('click.bs.alert.data-api', dismiss, Alert.prototype.close)
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: button.js v3.0.1
+ * Bootstrap: button.js v3.0.2
  * http://getbootstrap.com/javascript/#buttons
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -278,15 +278,21 @@
 
   Button.prototype.toggle = function () {
     var $parent = this.$element.closest('[data-toggle="buttons"]')
+    var changed = true
 
     if ($parent.length) {
       var $input = this.$element.find('input')
-        .prop('checked', !this.$element.hasClass('active'))
-        .trigger('change')
-      if ($input.prop('type') === 'radio') $parent.find('.active').removeClass('active')
+      if ($input.prop('type') === 'radio') {
+        // see if clicking on current one
+        if ($input.prop('checked') && this.$element.hasClass('active'))
+          changed = false
+        else
+          $parent.find('.active').removeClass('active')
+      }
+      if (changed) $input.prop('checked', !this.$element.hasClass('active')).trigger('change')
     }
 
-    this.$element.toggleClass('active')
+    if (changed) this.$element.toggleClass('active')
   }
 
 
@@ -330,9 +336,9 @@
     e.preventDefault()
   })
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: carousel.js v3.0.1
+ * Bootstrap: carousel.js v3.0.2
  * http://getbootstrap.com/javascript/#carousel
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -402,7 +408,7 @@
 
     if (pos > (this.$items.length - 1) || pos < 0) return
 
-    if (this.sliding)       return this.$element.one('slid', function () { that.to(pos) })
+    if (this.sliding)       return this.$element.one('slid.bs.carousel', function () { that.to(pos) })
     if (activeIndex == pos) return this.pause().cycle()
 
     return this.slide(pos > activeIndex ? 'next' : 'prev', $(this.$items[pos]))
@@ -454,7 +460,7 @@
 
     if (this.$indicators.length) {
       this.$indicators.find('.active').removeClass('active')
-      this.$element.one('slid', function () {
+      this.$element.one('slid.bs.carousel', function () {
         var $nextIndicator = $(that.$indicators.children()[that.getActiveIndex()])
         $nextIndicator && $nextIndicator.addClass('active')
       })
@@ -472,7 +478,7 @@
           $next.removeClass([type, direction].join(' ')).addClass('active')
           $active.removeClass(['active', direction].join(' '))
           that.sliding = false
-          setTimeout(function () { that.$element.trigger('slid') }, 0)
+          setTimeout(function () { that.$element.trigger('slid.bs.carousel') }, 0)
         })
         .emulateTransitionEnd(600)
     } else {
@@ -481,7 +487,7 @@
       $active.removeClass('active')
       $next.addClass('active')
       this.sliding = false
-      this.$element.trigger('slid')
+      this.$element.trigger('slid.bs.carousel')
     }
 
     isCycling && this.cycle()
@@ -547,9 +553,9 @@
     })
   })
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: collapse.js v3.0.1
+ * Bootstrap: collapse.js v3.0.2
  * http://getbootstrap.com/javascript/#collapse
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -726,9 +732,9 @@
     $target.collapse(option)
   })
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: dropdown.js v3.0.1
+ * Bootstrap: dropdown.js v3.0.2
  * http://getbootstrap.com/javascript/#dropdowns
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -770,7 +776,7 @@
 
     if (!isActive) {
       if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
-        // if mobile we we use a backdrop because click events don't delegate
+        // if mobile we use a backdrop because click events don't delegate
         $('<div class="dropdown-backdrop"/>').insertAfter($(this)).on('click', clearMenus)
       }
 
@@ -880,9 +886,9 @@
     .on('click.bs.dropdown.data-api'  , toggle, Dropdown.prototype.toggle)
     .on('keydown.bs.dropdown.data-api', toggle + ', [role=menu]' , Dropdown.prototype.keydown)
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: modal.js v3.0.1
+ * Bootstrap: modal.js v3.0.2
  * http://getbootstrap.com/javascript/#modals
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -1126,9 +1132,9 @@
     .on('show.bs.modal',  '.modal', function () { $(document.body).addClass('modal-open') })
     .on('hidden.bs.modal', '.modal', function () { $(document.body).removeClass('modal-open') })
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: popover.js v3.0.1
+ * Bootstrap: popover.js v3.0.2
  * http://getbootstrap.com/javascript/#popovers
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -1243,9 +1249,9 @@
     return this
   }
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: scrollspy.js v3.0.1
+ * Bootstrap: scrollspy.js v3.0.2
  * http://getbootstrap.com/javascript/#scrollspy
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -1359,7 +1365,7 @@
         .addClass('active')
     }
 
-    active.trigger('activate')
+    active.trigger('activate.bs.scrollspy')
   }
 
 
@@ -1401,9 +1407,9 @@
     })
   })
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: tab.js v3.0.1
+ * Bootstrap: tab.js v3.0.2
  * http://getbootstrap.com/javascript/#tabs
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -1536,9 +1542,9 @@
     $(this).tab('show')
   })
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: tooltip.js v3.0.1
+ * Bootstrap: tooltip.js v3.0.2
  * http://getbootstrap.com/javascript/#tooltip
  * Inspired by the original jQuery.tipsy by Jason Frame
  * ========================================================================
@@ -1922,9 +1928,9 @@
     return this
   }
 
-}(window.jQuery);
+}(jQuery);
 /* ========================================================================
- * Bootstrap: transition.js v3.0.1
+ * Bootstrap: transition.js v3.0.2
  * http://getbootstrap.com/javascript/#transitions
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
@@ -1978,11 +1984,10 @@
     $.support.transition = transitionEnd()
   })
 
-}(window.jQuery);
+}(jQuery);
 /*!
  * P2 Theme Javascript
  * https://github.com/p-2/p2-theme
  * @version: 0.1
  * @author:  Peter Edwards <Peter.Edwards@p-2.biz>
  */
-
