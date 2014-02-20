@@ -16,7 +16,7 @@ class p2_theme_options
 	public static function register()
 	{
         /* add the wordpress theme options page */
-        add_action( 'admin_menu', array(__CLASS__, 'add_options_pages') );
+        add_action( 'admin_menu', array(__CLASS__, 'add_options_page') );
         /* register settings */
         add_action( 'admin_init', array(__CLASS__, 'register_theme_options') );
 
@@ -34,51 +34,40 @@ class p2_theme_options
 	/**
 	* add a submenu to the theme admin menu to access the theme options page
 	*/
-	public static function add_options_pages() 
+	public static function add_options_page() 
 	{
 		$theme_settings_page = add_theme_page( 'Theme options', 'Theme options', 'manage_options', 'theme_options', array(__CLASS__, 'theme_options_page') );
-		$theme_colours_page = add_theme_page( 'Theme colours', 'Theme colours', 'manage_options', 'theme_colours', array(__CLASS__, 'theme_colours_page') );
 	}
 
 	/**
-	 * callbacks for options pges
-	 * both use a generic method to output options in different sections
+	 * callback for options page
 	 */
 	public static function theme_options_page()
 	{
-		self::theme_settings_page('theme_options');
-	}
-	public static function theme_colours_page()
-	{
-		self::theme_settings_page('theme_colours');
-	}
-
-	/**
-	 * creates the options page
-	 */
-	public static function theme_settings_page($section) 
-	{
-		print ("<div class=\"wrap\"><div class=\"icon32\" id=\"icon-themes\"><br /></div><h2>Theme options</h2>");
+		print('<div class="wrap"><div class="icon32" id="icon-themes"><br /></div><h2>Theme options</h2>');
 		if (isset($_REQUEST['settings-updated']) && $_REQUEST['settings-updated'] == "true") {
 			echo '<div id="message" class="updated"><p><strong>Settings saved.</strong></p></div>';
 		}
 		settings_errors('p2_options');
-		printf('<form method="post" action="options.php"><input type="hidden" name="p2-section" value="%s" />', $section);
+		print('<form method="post" action="options.php">');
+		print('<pre>');
+		print_r(self::get_theme_options());
+		print('</pre>');
 		settings_fields('p2_options');
-		do_settings_sections($section);
+		do_settings_sections('p2_options');
         print(self::get_palette());
 		print ('<p><input type="submit" class="button-primary" name="submit" value="Save settings" /></p></form></div>');
 	}
 
 	/**
-	 * gets the customisation options for both the theme customizer
+	 * gets the customisation options for both the theme customiser
 	 * and the theme options page.
 	 */
 	private static function get_customisation_options()
 	{
 		$customisation_options = array(
 			array(
-				'section' => 'theme_options',
+				'section' => 'p2_options',
 				'title' => 'Theme Options',
 				'customiser' => false,
 				'priority' => 35, 
@@ -148,7 +137,6 @@ class p2_theme_options
 						'type' => 'colour',
 						'default' => '#000000',
 						'selector' => 'html,body',
-						'customiser' => true,
 						'rules' => '{color:%s}'
 					),
 					'heading_colour' => array(
@@ -156,14 +144,12 @@ class p2_theme_options
 						'type' => 'colour',
 						'default' => '#0000ff',
 						'selector' => 'h1,h2,h3,h4,h5,h6',
-						'customiser' => true,
 						'rules' => '{color:%s}'
 					),
 					'link_colour' => array(
 						'label' => 'Link colour',
 						'type' => 'colour',
 						'default' => '#0000cc',
-						'customiser' => true,
 						'selector' => 'a',
 						'rules' => '{color:%s}'
 					),
@@ -200,11 +186,17 @@ class p2_theme_options
 	public static function get_theme_options()
 	{
 		$customiser_fields = self::get_customisation_options();
-		$stored_options = get_option('p2_options');
+		$theme_options = get_option('p2_options');
 		$options = array();
 		foreach ($customiser_fields as $cf) {
 			foreach ($cf['fields'] as $fieldname => $details) {
-				$options[$fieldname] = (is_array($stored_options) && isset($stored_options[$fieldname]))? $stored_options[$fieldname]: $details['default'];
+				if ($cf["customiser"]) {
+					/* customiser settings are in theme mods */
+					$options[$fieldname] = get_theme_mod($fieldname, $details["default"]);
+				} else {
+					/* other settings are in regular settings field */
+					$options[$fieldname] = (is_array($theme_options) && isset($theme_options[$fieldname]))? $theme_options[$fieldname]: $details['default'];
+				}
 			}
 		}
 		return $options;
@@ -223,14 +215,14 @@ class p2_theme_options
 		$customiser_fields = self::get_customisation_options();
 		foreach ($customiser_fields as $cf) {
 			foreach ($cf['fields'] as $fieldname => $details) {
-				if ($details["type"] == 'colour' || $details['type'] == 'colouralpha') {
+				if ($details["type"] == 'colour') {
 					$value = isset($options[$fieldname])? $options[$fieldname]: $details['default'];
 					if (is_array($details['selector'])) {
 						for ($i = 0; $i < count($details['selector']); $i++) {
-							$out .= $details['selector'][$i] . sprintf($details['rules'][$i], $value);
+							$out .= $details['selector'][$i] . sprintf($details['rules'][$i], $value) . ';';
 						}
 					} else {
-						$out .= $details['selector'] . sprintf($details['rules'], $value);
+						$out .= $details['selector'] . sprintf($details['rules'], $value) . ';';
 					}
 				}
 			}
@@ -248,6 +240,7 @@ class p2_theme_options
 	{
 
 	}
+
 	/**
 	 * returns an input containing the default colour palette
 	 */
@@ -279,31 +272,33 @@ class p2_theme_options
 		);
 		$customiser_fields = self::get_customisation_options();
 		foreach ($customiser_fields as $cf) {
-			add_settings_section(
-				$cf['section'], 
-				$cf['title'], 
-				array(
-					__CLASS__,
-					'section_text'
-				), 
-				$cf['section']
-			);
-			foreach ($cf['fields'] as $fieldname => $details) {
-				$method = 'option_' . $details['type'];
-				add_settings_field(
-					$fieldname,
-					$details['label'],
+			if (!$cf["customiser"]) {
+				add_settings_section(
+					$cf['section'], 
+					$cf['title'], 
 					array(
 						__CLASS__,
-						$method
-					) ,
-					$cf['section'],
-					$cf['section'],
-					array(
-						"field" => $fieldname,
-						"desc" => ""
-					)
+						'section_text'
+					), 
+					$cf['section']
 				);
+				foreach ($cf['fields'] as $fieldname => $details) {
+					$method = 'option_' . $details['type'];
+					add_settings_field(
+						$fieldname,
+						$details['label'],
+						array(
+							__CLASS__,
+							$method
+						) ,
+						$cf['section'],
+						$cf['section'],
+						array(
+							"field" => $fieldname,
+							"desc" => ""
+						)
+					);
+				}
 			}
 		}
 	}
@@ -322,15 +317,23 @@ class p2_theme_options
 	public static function option_text($fielddata, $settings = array())
 	{
 		$options = self::get_theme_options();
-		$settings = wp_parse_args($settings, array(
-			"length" => 60,
-			"class" => ''
-		));
-		$cls = ($settings["class"] == '')? '': ' class="' . $settings["class"] . '"';
 		$field = $fielddata["field"];
+		$cls = (isset($settings["class"]))? ' class="' . $settings["class"] . '"': '';
 		$len = (isset($settings["length"]) && intVal($settings["length"]) > 0) ? $settings["length"] : 60;
 		$option_value = (isset($options[$field]) && trim($options[$field]) != "") ? trim($options[$field]) : "";
 		printf('<input id="p2_options_%s" name="p2_options[%s]" type="text" value="%s" size="%s"%s />', $field, $field, $option_value, $len, $cls);
+	}
+
+	/**
+	 * integer field callback (just a text field with length and class set)
+	 */
+	public static function option_integer($fielddata, $settings = array())
+	{
+		if (!isset($settings["length"])) {
+			$settings["length"] = 7;
+		}
+		$settings["class"] = 'integer';
+		self::option_text($fielddata, $settings);
 	}
 
 	/**
@@ -342,19 +345,6 @@ class p2_theme_options
 		$field = $fielddata["field"];
 		$option_value = (isset($options[$field]) && trim($options[$field]) != "") ? trim($options[$field]) : "";
 		printf('<input id="p2_options_%s" class="color-picker-hex" placeholder="Hex value" name="p2_options[%s]" type="text" data-default-color="%s" value="%s" size="7" />', $field, $field, $option_value, $option_value);
-	}
-
-	/**
-	 * colour input field callback with alpha
-	 */
-	public static function option_colouralpha($fielddata)
-	{
-		$options = self::get_wkw_options();
-		$field = $fielddata["field"];
-		$option_value = (isset($options[$field]) && trim($options[$field]) != "") ? trim($options[$field]) : "";
-		$ho = self::rgba2hexop($option_value);
-		//print_r($ho);
-		printf('<input id="wkw_options_%s_hex" class="color-picker-hex" placeholder="Hex value" name="wkw_options[%s][hex]" type="text" data-default-color="%s" value="%s" size="7" /><br />Opacity (1 = opaque, 0 = transparent): <input "wkw-options_%s_op" type="text" size="5" name="wkw_options[%s][op]" value="%s" />', $field, $field, $ho['hex'], $ho['hex'], $field, $field, $ho['op'], $ho['op']);
 	}
 
 	/**
@@ -380,16 +370,6 @@ class p2_theme_options
 		$option_value = (isset($options[$field]) && $options[$field]) ? true : false;
 		$chckd = $option_value? ' checked="checked"': '';
 		printf('<input type="checkbox" id="p2_options_%s" name="p2_options[%s]"%s />%s', $field, $field, $chckd, $desc);
-	}
-
-	/**
-	 * simple input field callback
-	 */
-	public static function option_integer($fielddata, $settings = array())
-	{
-		$settings["length"] = 7;
-		$settings["class"] = 'integer';
-		self::option_text($fielddata, $settings);
 	}
 
 	/**
@@ -464,46 +444,44 @@ class p2_theme_options
 				}
 				$priority = 1;
 				foreach ($cf['fields'] as $fieldname => $details) {
-					if (isset($details['customiser']) && $details['customiser']) {
-						/* Register new settings to the WP database */
-						$wp_customize->add_setting( $section . '[' . $fieldname . ']',
-							array(
-								'default' => $details['default'],
-								'type' => 'option',
-								'capability' => 'edit_theme_options',
-								'transport' => 'postMessage'
-							) 
+					/* Register new settings to the WP database */
+					$wp_customize->add_setting( $section . '[' . $fieldname . ']',
+						array(
+							'default' => $details['default'],
+							'type' => 'option',
+							'capability' => 'edit_theme_options',
+							'transport' => 'postMessage'
+						) 
+					);
+					/* define the control */
+					if ($details["type"] == "colour") {
+						$wp_customize->add_control( 
+							new WP_Customize_Color_Control(
+								$wp_customize,
+								$section . '_' . $fieldname,
+								array(
+									'label' => $details['label'],
+									'section' => $section,
+									'settings' => $section . '[' . $fieldname . ']',
+									'priority' => $priority		
+								) 
+							)
 						);
-						/* define the control */
-						if ($details["type"] == "colour") {
-							$wp_customize->add_control( 
-								new WP_Customize_Color_Control(
-									$wp_customize,
-									$section . '_' . $fieldname,
-									array(
-										'label' => $details['label'],
-										'section' => $section,
-										'settings' => $section . '[' . $fieldname . ']',
-										'priority' => $priority		
-									) 
-								)
-							);
-							$priority++;
-						} elseif ($details["type"] == "text") {
-							$wp_customize->add_control( 
-								new WP_Customize_Control(
-									$wp_customize,
-									$section . '_' . $fieldname,
-									array(
-										'label' => $details['label'],
-										'section' => $section,
-										'settings' => $section . '[' . $fieldname . ']',
-										'priority' => $priority		
-									) 
-								)
-							);
-							$priority++;
-						}
+						$priority++;
+					} elseif ($details["type"] == "text") {
+						$wp_customize->add_control( 
+							new WP_Customize_Control(
+								$wp_customize,
+								$section . '_' . $fieldname,
+								array(
+									'label' => $details['label'],
+									'section' => $section,
+									'settings' => $section . '[' . $fieldname . ']',
+									'priority' => $priority		
+								) 
+							)
+						);
+						$priority++;
 					}
 				}
 			}

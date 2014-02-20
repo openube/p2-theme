@@ -27,21 +27,22 @@
 	} );
 	
 	// Update text color
-	wp.customize( 'p2_options[text_colour]', function( value ) {
+	wp.customize( 'text_colour', function( value ) {
 		value.bind( function( newval ) {
+			alert(newval);
 			$('body').css('color', newval );
 		} );
 	} );
 
 	// Update link color
-	wp.customize( 'p2_options[link_colour]', function( value ) {
+	wp.customize( 'link_colour', function( value ) {
 		value.bind( function( newval ) {
 			$('a').css('color', newval );
 		} );
 	} );
 
 	// Update headings colour
-	wp.customize( 'p2_options[heading_colour]', function( value ) {
+	wp.customize( 'heading_colour', function( value ) {
 		value.bind( function( newval ) {
 			console.log(newval);
 			$('h2,h3,h4,h5,h6').css('color', newval );
