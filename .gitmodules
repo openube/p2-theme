@@ -1,3 +1,12 @@
 [submodule "bootstrap"]
 	path = bootstrap
 	url = https://github.com/twbs/bootstrap.git
+[submodule "foundation"]
+	path = foundation
+	url = https://github.com/zurb/foundation.git
+[submodule "yaml"]
+	path = yaml
+	url = https://github.com/yamlcss/yaml.git
+[submodule "Frameless"]
+	path = Frameless
+	url = https://github.com/jonikorpi/Frameless.git
