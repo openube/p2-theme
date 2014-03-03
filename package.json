@@ -1,0 +1,21 @@
+{
+  "name": "p2-theme",
+  "version": "0.0.1",
+  "description": "Wordpress theme based on Twitter Bootstrap and HTML5 Boilerplate",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:p-2/p2-theme.git"
+  },
+  "author": "Peter Edwards <Peter.Edwards@p-2.biz>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/p-2/p2-theme/issues"
+  },
+  "homepage": "https://github.com/p-2/p2-theme",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-less": "~0.9.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.3.3"
+  }
+}

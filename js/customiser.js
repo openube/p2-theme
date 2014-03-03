@@ -13,7 +13,7 @@
 	} );
 	
 	// Update title color
-	wp.customize( 'header_textcolor', function( value ) {
+	wp.customize( 'theme_colours[header_textcolor]', function( value ) {
 		value.bind( function( newval ) {
 			$('#site-header a').css('color', newval );
 		} );
@@ -27,22 +27,21 @@
 	} );
 	
 	// Update text color
-	wp.customize( 'text_colour', function( value ) {
+	wp.customize( 'theme_colours[text_colour]', function( value ) {
 		value.bind( function( newval ) {
-			alert(newval);
 			$('body').css('color', newval );
 		} );
 	} );
 
 	// Update link color
-	wp.customize( 'link_colour', function( value ) {
+	wp.customize( 'theme_colours[link_colour]', function( value ) {
 		value.bind( function( newval ) {
 			$('a').css('color', newval );
 		} );
 	} );
 
 	// Update headings colour
-	wp.customize( 'heading_colour', function( value ) {
+	wp.customize( 'theme_colours[heading_colour]', function( value ) {
 		value.bind( function( newval ) {
 			console.log(newval);
 			$('h2,h3,h4,h5,h6').css('color', newval );
