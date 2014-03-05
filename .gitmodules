@@ -10,3 +10,6 @@
 [submodule "Frameless"]
 	path = Frameless
 	url = https://github.com/jonikorpi/Frameless.git
+[submodule "roots"]
+	path = roots
+	url = https://github.com/roots/roots.git
