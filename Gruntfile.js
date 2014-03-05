@@ -10,9 +10,22 @@ module.exports = function(grunt) {
       },
       dist: {
         // the files to concatenate
-        src: ['bootstrap/js/affix.js', 'bootstrap/js/alert.js', 'bootstrap/js/button.js', 'bootstrap/js/carousel.js', 'bootstrap/js/collapse.js', 'bootstrap/js/dropdown.js', 'bootstrap/js/modal.js', 'bootstrap/js/popover.js', 'bootstrap/js/scrollspy.js', 'bootstrap/js/tab.js', 'bootstrap/js/tooltip.js', 'bootstrap/js/transition.js'],
+        src: [
+        	//'bootstrap/js/affix.js', 
+        	//'bootstrap/js/alert.js', 
+        	//'bootstrap/js/button.js',
+        	'bootstrap/js/carousel.js', 
+        	'bootstrap/js/collapse.js', 
+        	'bootstrap/js/dropdown.js', 
+        	//'bootstrap/js/modal.js', 
+        	//'bootstrap/js/popover.js', 
+        	//'bootstrap/js/scrollspy.js', 
+        	'bootstrap/js/tab.js', 
+        	//'bootstrap/js/tooltip.js', 
+        	'bootstrap/js/transition.js'
+        ],
         // the location of the resulting JS file
-        dest: 'js/bootstrap.plugins.js'
+        dest: 'js/bootstrap.js'
       }
     },
     uglify: {
@@ -23,7 +36,7 @@ module.exports = function(grunt) {
           mangle: false
         },
         files: {
-          'js/bootstrap.plugins.min.js': ['<%= concat.dist.dest %>']
+          'js/bootstrap.min.js': ['<%= concat.dist.dest %>']
         }
       },
       themejs: {
@@ -74,6 +87,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-less');
 
   // Default task(s).
-  grunt.registerTask('default', ['less']);
+  grunt.registerTask('default', ['less:development']);
 
 };

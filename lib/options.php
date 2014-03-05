@@ -78,42 +78,50 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 					'capability' => 'edit_theme_options',
 					'description' => __('Allows you to customize site options.', 'p2_theme'),
 					'settings' => array(
-						'google_analytics_id' => array(
+						array(
+							'name' => 'google_analytics_id',
 							'label' => __('Google Analytics ID', 'p2_theme'),
 							'type' => 'text',
 							'default' => ''
 						),
-						'google_verification' => array(
+						array(
+							'name' => 'google_verification',
 							'label' => __('Google Verification ID', 'p2_theme'),
 							'type' => 'text',
 							'default' => ''
 						),
-						'excerpt_length' => array(
+						array(
+							'name' => 'excerpt_length',
 							'label' => __('Length of Post excerpts', 'p2_theme'),
 							'type' => 'integer',
 							'default' => 50
 						),
-						'excerpt_more' => array(
+						array(
+							'name' => 'excerpt_more',
 							'label' => __('"Read more" link text', 'p2_theme'),
 							'type' => 'text',
 							'default' => __('Read More&hellip;', 'p2_theme'),
 						),
-						'use_custom_header' => array(
+						array(
+							'name' => 'use_custom_header',
 							'label' => __('Use custom header?', 'p2_theme'),
 							'type' => 'checkbox',
 							'default' => true
 						),
-						'use_custom_background' => array(
+						array(
+							'name' => 'use_custom_background',
 							'label' => __('Use custom background?', 'p2_theme'),
 							'type' => 'checkbox',
 							'default' => true
 						),
-						'use_post_formats' => array(
+						array(
+							'name' => 'use_post_formats',
 							'label' => __('Use post formats?', 'p2_theme'),
 							'type' => 'checkbox',
 							'default' => false
 						),
-						"use_boilerplate_htaccess" => array(
+						array(
+							'name' => 'use_boilerplate_htaccess',
 							'label' => __('Use HTML5 boilerplate .htaccess rules?', 'p2_theme'),
 							'type' => 'checkbox',
 							'default' => true
@@ -124,7 +132,7 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 					"name" => 'link_styles',
 					"title" => __( 'Link Colours', 'p2_theme' ),
 					"customiser" => true,
-					"priority" => 38,
+					"priority" => 35,
 					"description" => __('Change the colours for links.', 'p2_theme'),
 					"settings" => array(
 						array(
@@ -194,7 +202,7 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 					"settings" => array(
 						array(
 							"name" => "h1_colour",
-							"label" => __( 'H1 heading colour', 'p2_theme' ),
+						 	"label" => __( 'H1 heading colour', 'p2_theme' ),
 							"type" => "colour",
 							"priority" => 1,
 							"selector" => ".content h1",
@@ -241,6 +249,70 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 							'default' => '#115a48'
 						)
 					)
+				),
+				array(
+					"name" => 'navbar_styles',
+					"title" => __( 'Navigation', 'p2_theme' ),
+					"customiser" => true,
+					"priority" => 37,
+					"description" => __('Change the navigation bars.', 'p2_theme'),
+					"settings" => array(
+						array(
+							"name" => "primary_navbar_horizontal",
+						 	"label" => __( 'Horizontal alignment (primary)', 'p2_theme' ),
+							"type" => "radio",
+							"priority" => 1,
+							"default" => 'navbar-left',
+							"choices" => array(
+								'navbar-left' => "Left",
+								'navbar-right' => 'Right'
+							)
+						),
+						array(
+							"name" => "primary_navbar_vertical",
+						 	"label" => __( 'Vertical alignment (primary)', 'p2_theme' ),
+							"type" => "radio",
+							"priority" => 2,
+							"default" => 'navbar-fixed-top',
+							"choices" => array(
+								'navbar-fixed-top' => "Top",
+								'navbar-fixed-bottom' => 'Bottom'
+							)
+						),
+						array(
+							"name" => "primary_navbar_colour",
+						 	"label" => __( 'Colour (primary)', 'p2_theme' ),
+							"type" => "radio",
+							"priority" => 3,
+							"default" => 'navbar-default',
+							"choices" => array(
+								'navbar-default' => "Default",
+								'navbar-inverse' => 'Inverse'
+							)
+						),
+						array(
+							"name" => "secondary_navbar_horizontal",
+						 	"label" => __( 'Horizontal alignment (secondary)', 'p2_theme' ),
+							"type" => "radio",
+							"priority" => 4,
+							"default" => 'navbar-left',
+							"choices" => array(
+								'navbar-left' => "Left",
+								'navbar-right' => 'Right'
+							)
+						),
+						array(
+							"name" => "secondary_navbar_colour",
+						 	"label" => __( 'Colour (secondary)', 'p2_theme' ),
+							"type" => "radio",
+							"priority" => 5,
+							"default" => 'navbar-default',
+							"choices" => array(
+								'navbar-default' => "Default",
+								'navbar-inverse' => 'Inverse'
+							)
+						)
+					)
 				)
 			);
 		}
@@ -265,7 +337,7 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 			$option_data = self::get_option_data();
 			foreach ($option_data as $section) {
 				/* just do the Theme options here - customiser is handlked elsewhere */
-				if (!isset($section["customiser"])) {
+				if (!$section["customiser"]) {
 					add_settings_section(
 						$section['name'], 
 						$section['title'], 
@@ -276,10 +348,10 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 						$section['page']
 					);
 					/* go through each field */
-					foreach ($section["settings"] as $fieldname => $details) {
+					foreach ($section["settings"] as $details) {
 						$method = 'option_' . $details['type'];
 						add_settings_field(
-							$fieldname,
+							$details["name"],
 							$details['label'],
 							array(
 								__CLASS__,
@@ -288,7 +360,7 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 							$section['page'],
 							$section['name'],
 							array(
-								"fieldname" => $fieldname
+								"fieldname" => $details["name"]
 							)
 						);
 					}
@@ -302,7 +374,7 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 		 * @see add_action('customize_register',$func)
 		 * @param \WP_Customize_Manager $wp_customize
 		 */
-		public static function register_customiser_settings ( $wp_customize )
+		public static function register_customiser_options( $wp_customize )
 		{
 			/* get option data */
 			$options = self::get_option_data();
@@ -313,7 +385,7 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 			/* go through options adding fields */
 			foreach ($options as $section) {
 
-				if (isset($section["customiser"])) {
+				if ($section["customiser"]) {
 
 					$section_name = 'p2_options_' . $section["name"];
 
@@ -327,14 +399,14 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 						) 
 					);
 
-					foreach ($section["settings"] as $setting) {
+					foreach ($section["settings"] as $details) {
 				
-						$setting_name = 'p2_options[' . $setting["name"] . ']';
+						$setting_name = 'p2_options[' . $details["name"] . ']';
 						
 						/* Register new settings */
 						$wp_customize->add_setting( $setting_name,
 							array(
-								'default' => $default_options[$setting["name"]], //Default setting/value to save
+								'default' => $default_options[$details["name"]], //Default setting/value to save
 								'type' => 'option', //Is this an 'option' or a 'theme_mod'?
 								'capability' => 'edit_theme_options', //Optional. Special permissions for accessing this setting.
 								'transport' => 'postMessage', //What triggers a refresh of the setting? 'refresh' or 'postMessage' (instant)?
@@ -342,16 +414,16 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 						);
 
 						/* add Customiser controls */
-						switch ($setting["type"]) {
+						switch ($details["type"]) {
 							case "colour":
 								$wp_customize->add_control( new WP_Customize_Color_Control( //Instantiate the color control class
 									$wp_customize, //Pass the $wp_customize object (required)
 									str_replace(array('[', ']'), array('_', ''), $setting_name), //Set a unique ID for the control
 									array(
-										'label' => $setting["label"], //Admin-visible name of the control
+										'label' => $details["label"], //Admin-visible name of the control
 										'section' => $section_name, //ID of the section this control should render in (can be one of yours, or a WordPress default section)
 										'settings' => $setting_name, //Which setting to load and manipulate
-										'priority' => $setting["priority"], //Determines the order this control appears in for the specified section
+										'priority' => $details["priority"], //Determines the order this control appears in for the specified section
 									) 
 								) );
 								break;
@@ -362,11 +434,11 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 									$wp_customize,
 									str_replace(array('[', ']'), array('_', ''), $setting_name), //Set a unique ID for the control
 									array(
-										'type' => $setting["type"], // type of control (text, checkbox or dropdown pages)
-										'label' => $setting["label"], //Admin-visible name of the control
+										'type' => $details["type"], // type of control (text, checkbox or dropdown pages)
+										'label' => $details["label"], //Admin-visible name of the control
 										'section' => $section_name, //ID of the section this control should render in (can be one of yours, or a WordPress default section)
 										'settings' => $setting_name, //Which setting to load and manipulate
-										'priority' => $setting["priority"], //Determines the order this control appears in for the specified section
+										'priority' => $details["priority"], //Determines the order this control appears in for the specified section
 									)
 								) );
 								break;
@@ -376,12 +448,12 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 									$wp_customize,
 									str_replace(array('[', ']'), array('_', ''), $setting_name), //Set a unique ID for the control
 									array(
-										'type' => $setting["type"], // type of control (radio or select)
-										'label' => $setting["label"], //Admin-visible name of the control
+										'type' => $details["type"], // type of control (radio or select)
+										'label' => $details["label"], //Admin-visible name of the control
 										'section' => $section_name, //ID of the section this control should render in (can be one of yours, or a WordPress default section)
 										'settings' => $setting_name, //Which setting to load and manipulate
-										'priority' => $setting["priority"], //Determines the order this control appears in for the specified section
-										'choices' => $setting["choices"] // Array of possible values for radio/select
+										'priority' => $details["priority"], //Determines the order this control appears in for the specified section
+										'choices' => $details["choices"] // Array of possible values for radio/select
 									)
 								) );
 								break;
@@ -423,9 +495,9 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 			}
 			settings_errors('p2_options');
 			print('<form method="post" action="options.php">');
-			print('<pre>');
-			print_r(self::get_theme_options());
-			print('</pre>');
+			//print('<pre>');
+			//print_r(self::get_theme_options());
+			//print('</pre>');
 			settings_fields('p2_options');
 			do_settings_sections('p2_options');
 			printf('<p><input type="submit" class="button-primary" name="submit" value="%s" /></p></form></div>', __('Save settings', 'p2_theme'));
@@ -508,29 +580,34 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 		 */
 		public static function validate_theme_options($theme_options)
 		{
+			$default_options = self::get_default_options();
 			$option_data = self::get_option_data();
-			$options = self::get_theme_options();
-			/* get all fields not handled by customiser */
-			$settings = array();
 			foreach ($option_data as $section) {
 				if (!isset($section["customiser"])) {
-					$settings = array_merge($fields, $section["settings"]);
+					foreach ($section["settings"] as $details) {
+						switch ($details["type"]) {
+							case "integer":
+								if (isset($theme_options[$details["name"]]) && trim($theme_options[$details["name"]]) != '') {
+									$theme_options[$details["name"]] = intval($theme_options[$details["name"]]);
+								} else {
+									$theme_options[$details["name"]] = $default_options[$details["name"]];
+								}
+								break;
+							case "checkbox":
+								$theme_options[$details["name"]] = (isset($theme_options[$details["name"]]));
+								break;
+							default:
+								if (isset($theme_options[$details["name"]]) && trim($theme_options[$details["name"]]) != '') {
+									$theme_options[$details["name"]] = trim($theme_options[$details["name"]]);
+								} else {
+									$theme_options[$details["name"]] = $default_options[$details["name"]];
+								}
+								break;
+						}
+					}
 				}
 			}
-			foreach ($settings as $fieldname => $details) {
-				switch ($details['type']) {
-					case 'checkbox':
-						$options[$fieldname] = isset($theme_options[$fieldname]);
-						break;
-					case 'integer':
-						$options[$fieldname] = intval($theme_options[$fieldname]);
-						break;
-					default:
-						$options[$fieldname] = trim($theme_options[$fieldname]);
-						break;
-				}
-			}
-			return $options;
+			return $theme_options;
 		}
 
 		/***********************************************
@@ -556,7 +633,7 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 		{
 			echo json_encode(
 				array(
-					"data" => self::get_option_data(),
+					"settings" => self::get_option_data(),
 					"values" => self::get_theme_options(),
 					"palette" => self::get_palette()
 				)
@@ -572,7 +649,7 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 		{
 			/* get theme options */
 			$theme_options = self::get_theme_options();
-
+			
 			/* get option data */
 			$option_data = self::get_option_data();
 			
@@ -581,28 +658,30 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 
 			/* go through $option_data and use selectors defined there */
 			foreach ($option_data as $section) {
-				foreach ($section["settings"] as $setting) {
-					if (isset($setting["selector"])) {
-						if (is_array($setting["selector"])) {
-							for ($i = 0; $i < count($setting["selector"]); $i++) {
-								$property = (isset($setting["property"]) && isset($setting["property"][$i]))? $setting["property"][$i]: "color";
-								$value_fmt = (isset($setting["value_fmt"]) && isset($setting["value_fmt"][$i]))? $setting["value_fmt"][$i]: "%s";
-								$value = str_replace('%s', $theme_options[$section["name"]][$setting["name"]], $value_fmt);
-								$css .= sprintf('%s{%s:%s}', $setting["selector"][$i], $property, $value);
+				foreach ($section["settings"] as $details) {
+					if (isset($details["selector"])) {
+						if (is_array($details["selector"])) {
+							for ($i = 0; $i < count($details["selector"]); $i++) {
+								$property = (isset($details["property"]) && isset($details["property"][$i]))? $details["property"][$i]: "color";
+								$value_fmt = (isset($details["value_fmt"]) && isset($details["value_fmt"][$i]))? $details["value_fmt"][$i]: "%s";
+								$value = str_replace('%s', $theme_options[$details["name"]], $value_fmt);
+								$css .= sprintf('%s{%s:%s}', $details["selector"][$i], $property, $value);
 							}
 						} else {
-							$property = isset($setting["property"])? $setting["property"]: "color";
-							$value_fmt = isset($setting["value_fmt"])? $setting["value_fmt"]: "%s";
-							$value = str_replace('%s', $theme_options[$section["name"]][$setting["name"]], $value_fmt);
-							$css .= sprintf('%s{%s:%s}', $setting["selector"], $property, $value);
+							$property = isset($details["property"])? $details["property"]: "color";
+							$value_fmt = isset($details["value_fmt"])? $details["value_fmt"]: "%s";
+							$value = str_replace('%s', $theme_options[$details["name"]], $value_fmt);
+							$css .= sprintf('%s{%s:%s}', $details["selector"], $property, $value);
 						}
 					}
 				}
 			}
 
-			$normal_css .= "\n      -->\n    </style>\n";
-			echo $ie_css . $ie_55_to_8_css . $ie6_css . $ie7_css . $normal_css;
-			print('<!--/Customizer CSS-->');
+			$css .= "\n      -->\n    </style>\n";
+			print($css . '<!--/Customizer CSS-->');
+			if (isset($theme_options['google_verification']) && trim($theme_options['google_verification']) != "") {
+				printf('<meta name="google-verification" value="%s">', $theme_options['google_verification']);
+			}
 		}
 		 
 		/**
@@ -634,11 +713,13 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 
 			/* go through $option_data looking for colours */
 			foreach ($option_data as $section) {
-				foreach ($section["settings"] as $setting) {
-					if ($setting["type"] == "colour" && isset($theme_options[$section["name"]]) && !empty($theme_options[$section["name"]])) {
-            			$palette[] = $theme_options[$section["name"]];
-            		}
-            	}
+				if ($section["customiser"]) {
+					foreach ($section["settings"] as $setting) {
+						if ($setting["type"] == "colour" && isset($theme_options[$setting["name"]]) && !empty($theme_options[$setting["name"]])) {
+	            			$palette[] = $theme_options[$setting["name"]];
+	            		}
+	            	}
+	            }
             }
             return array_unique($palette);
         }

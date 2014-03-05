@@ -47,6 +47,12 @@ class p2
 		// set_post_thumbnail_size(150, 150, false);
 		// add_image_size('category-thumb', 300, 9999); // 300px wide (and unlimited height)
 
+		/*
+		 * Switches default core markup for search form, comment form,
+		 * and comments to output valid HTML5.
+		 */
+		add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list' ) );
+
 		// Tell the TinyMCE editor to use a custom stylesheet
 		add_editor_style('/css/editor-style.css');
 
@@ -254,10 +260,9 @@ class p2
 	 */
 	public static function admin_header_style()
 	{
-		$header_image = get_header_image();
 	    printf('<style type="text/css">.appearance_page_custom-header #headimg{border:one;-webkit-box-sizing: border-box;-moz-box-sizing:border-box;box-sizing:border-box;');
 	    if ( ! empty( $header_image ) ) {
-			printf('background: url("%s") no-repeat scroll top;', esc_url($header_image) );
+			printf('background: url(%s) no-repeat scroll top;', esc_url( get_header_image() ) );
 		}
 		print('}');
 		if ( ! display_header_text() ) {
@@ -275,7 +280,7 @@ class p2
 	 */
 	public static function admin_header_image()
 	{
-		printf('<div id="headimg" style="background: url(%s) no-repeat scroll top;">', esc_url( header_image() ));
+		printf('<div id="headimg" style="background: url(%s) no-repeat scroll top;">', esc_url( get_header_image() ));
 		$style = ' style="color:#' . get_header_textcolor() . ';"';
 		printf('<h1><a id="name" onclick="return false;" href="#"%s>%s</a></h1>', $style, get_bloginfo( 'name' ));
 		print('</div>');

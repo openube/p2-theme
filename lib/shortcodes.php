@@ -17,9 +17,12 @@ class p2_shortcodes
 		add_filter('use_default_gallery_style', '__return_null');
 		/* replace default gallery shortcode */
 		remove_shortcode('gallery');
-		add_shortcode( 'gallery', array('p2_shortcodes', 'gallery') );
+		add_shortcode( 'gallery', array(__CLASS__, 'gallery') );
 		/* filter caption shortcode*/
-		add_filter( 'img_caption_shortcode', array('p2_shortcodes', 'caption'), 10, 3);
+		add_filter( 'img_caption_shortcode', array(__CLASS__, 'caption'), 10, 3);
+		/* filter content for tabs */
+        add_filter('the_content', array(__CLASS__, 'filter_content'));
+
 
 	}
 
@@ -139,6 +142,136 @@ class p2_shortcodes
 		$output .= '</ul>';
 		return $output;
 	}
+
+    static public function filter($c) {
+        // Run the loop, starting at level 1
+        $c = self::loop($c, 1, 'acc');
+        $c = self::loop($c, 1, 'tab');
+
+        return $c;
+    }
+
+    // $c is content, $l is the current tab level
+    static private function loop($c, $l, $t) {
+
+        // The tab pattern - ain't it pretty
+        $pattern = '/^.*\['.$t.':{'.$l.'}([^:][^\]]*)\].*$/im';
+
+        // Find first occurernce of this level.
+        // If none found return passed content / If found get first match
+        if (!preg_match($pattern, $c, $first_matches, PREG_OFFSET_CAPTURE)) {
+            return $c;
+        } else {
+            $first = $first_matches[0][1];
+        }
+
+        // Find current level tab end or show an error message
+        if (preg_match('/^.*\['.$t.':{'.$l.'}END\].*$/im', $c, $last_matches, PREG_OFFSET_CAPTURE)) {
+            $last = $last_matches[0][1];
+        } else {
+            die('<div class="smut-error"><p>No valid end '.$t.': ['.$t.str_repeat(':', $l).'END]</p><p>Started at "'.$first_matches[1][0].'" '.$t.'</p></div>');
+        }
+
+        // Pre becomes anything before first tab
+        $pre = substr($c, 0, $first);
+        // Post becomes anything after end of tabs
+        $post = substr($c, $last+strlen($last_matches[0][0]));
+
+        // $inner becomes anything in between $pre and $post
+        $string = substr($c, $first, $last-$first);
+
+        // Get all matches for tabs: goes into $matches, if none found return content to avoid unnecessary work
+        if (!preg_match_all($pattern, $string, $matches, PREG_OFFSET_CAPTURE)) {
+            return $c;
+        }
+
+        // Current header level
+        $hl = ($l+self::$first_header_level < 6) ? $l+self::$first_header_level : 6;
+
+        if ($t === 'tab') {
+            // Setup link list
+            $link_list .= '<ul class="nav nav-tabs">';
+        }
+
+        // Inner keeps track of content
+        $inner = '';
+
+        $n = count($matches[0]);
+
+        for ($i = 0; $i < $n; $i++) {
+
+            // Title from second set of preg_matches
+            $title = $matches[1][$i][0];
+
+            // Get unique nav id
+            $nav_id = self::make_nav_id($title);
+
+            // Start of div
+            $extras = ($i == 0)? ' in active': '';
+            $inner .= "\n".'<div id="'.$nav_id.'" class="tab-pane fade ' . $extras . ' level-' . $l . '">';
+
+            if ($t === 'tab') {
+                // Add to list of links to precede the div
+                $link_list .= '<li><a href="#'.$nav_id.'">'.$title.'</a></li>';
+            }
+
+            // Get substring to itterate over
+            $start = $matches[0][$i][1] + strlen($matches[0][$i][0]);
+            $end = isset($matches[0][$i+1][1]) ? $matches[0][$i+1][1] : strlen($string)-1;
+            $stop = $end - $start;
+
+            // Substring to check for more tabs
+            $inner .= self::loop(substr($string, $start, $stop), $l+1, $t);
+
+            // End of div
+            $inner .= "\n".'</div>';
+        }
+
+        // Add all content before, div start before
+        $pre .= "\n\n".'<div class="smut-'.$t.'s level-'.$l.'">';
+
+        if ($t === 'tab') {
+            // End link list
+            $link_list .= '</ul>';
+            // Add link list to pre
+            $pre .= $link_list;
+        }
+
+        // Add div end and loop through following content for other tabs
+        $post = "\n\n".'</div>' . self::loop($post, $l, $t);
+
+        // Combine the pre-tab content, tab content, and post-tab content
+        $c = $pre . $inner . $post;
+
+        // Return the tab content
+        return $c;
+    }
+
+    // Create unique alphanumeric id tags
+    static private function make_nav_id($t) {
+
+        // Remove all non alpha-numeric characters (and any end-hyphens)
+        $t = htmlspecialchars_decode($t);
+        $t = str_replace('&', 'and', $t);
+        $t = preg_replace('/[^a-zA-Z0-9]+/', '-', strtolower($t));
+        $t = preg_replace('/(^-)|(-$)/', '', $t);
+        $title = $t;
+
+        $n = 1;
+
+        // While id is already in use (generally won't run)
+        while (in_array($title, self::$used_names)) {
+            // Add a number to end of id until becomes unique
+            $title = $t.'-'.$n;
+            $n++;
+        }
+
+        // Add id to list of used 'id's
+        self::$used_names[] = $title;
+
+        return $title;
+    }
+
 }
 p2_shortcodes::register();
 endif;
