@@ -86,7 +86,6 @@
 							/* single selector */
 							var prop = setting.property? setting.property: 'color';
 							var val = setting.value_fmt? setting.value_fmt.replace('%s', setting.value): setting.value;
-							console.log(setting.selector,prop,val);
 							$(setting.selector).css(prop, val);
 						} else {
 							/* multiple selector */
@@ -99,47 +98,28 @@
 					} else {
 						/* no selector - special cases */
 						switch(setting.name) {
-							case 'primary_navbar_horizontal':
-						 		/*"label" => __( 'Horizontal alignment (primary)', 'p2_theme' ),
-							"type" => "radio",
-							"priority" => 1,
-							"default" => 'navbar-left',
-							"choices" => array(
-								'navbar-left' => "Left",
-								'navbar-right' => 'Right'
-							)*/
+							case 'top_navbar_vertical':
+								if (setting.value == 'navbar-fixed-top') {
+									$('top_navigation').removeClass('navbar-fixed-bottom').addClass('navbar-fixed-top');
+								} else {
+									$('top_navigation').removeClass('navbar-fixed-top').addClass('navbar-fixed-bottom');
+								}
 								break;
-							case 'primary_navbar_vertical':
-						 	/*"label" => __( 'Vertical alignment (primary)', 'p2_theme' ),
-							"type" => "radio",
-							"priority" => 2,
-							"default" => 'navbar-fixed-top',
-							"choices" => array(
-								'navbar-fixed-top' => "Top",
-								'navbar-fixed-bottom' => 'Bottom'
-							)*/
+							case 'top_navbar_colour':
+								if (setting.value == 'navbar-default') {
+									$('top_navigation').removeClass('navbar-inverse').addClass('navbar-default');
+								} else {
+									$('top_navigation').removeClass('navbar-default').addClass('navbar-inverse');
+								}
 								break;
-							case 'primary_navbar_colour':
-						 	/*"label" => __( 'Colour (primary)', 'p2_theme' ),
-							"type" => "radio",
-							"priority" => 3,
-							"default" => 'navbar-default',
-							"choices" => array(
-								'navbar-default' => "Default",
-								'navbar-inverse' => 'Inverse'
-							)*/
+							case 'header_navbar_colour':
+								if (setting.value == 'navbar-default') {
+									$('header_navigation').removeClass('navbar-inverse').addClass('navbar-default');
+								} else {
+									$('header_navigation').removeClass('navbar-default').addClass('navbar-inverse');
+								}
 								break;
-							case 'secondary_navbar_horizontal':
-						 	/*"label" => __( 'Horizontal alignment (secondary)', 'p2_theme' ),
-							"type" => "radio",
-							"priority" => 4,
-							"default" => 'navbar-left',
-							"choices" => array(
-								'navbar-left' => "Left",
-								'navbar-right' => 'Right'
-							)*/
-								break;
-						)
+						}
 					}
 				}
 			}

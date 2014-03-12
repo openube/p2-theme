@@ -56,8 +56,8 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 			$defaults = array();
 			$option_data = self::get_option_data();
 			foreach ($option_data as $section) {
-				foreach($section["settings"] as $fieldname => $details) {
-					$defaults[$fieldname] = $details["default"];
+				foreach($section["settings"] as $details) {
+					$defaults[$details["name"]] = $details["default"];
 				}
 			}
 			return $defaults;
@@ -82,24 +82,48 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 							'name' => 'google_analytics_id',
 							'label' => __('Google Analytics ID', 'p2_theme'),
 							'type' => 'text',
+							'allowempty' => true,
 							'default' => ''
 						),
 						array(
 							'name' => 'google_verification',
 							'label' => __('Google Verification ID', 'p2_theme'),
 							'type' => 'text',
+							'allowempty' => true,
 							'default' => ''
+						),
+						array(
+							'name' => 'use_post_thumbnails',
+							'label' => __('Use post thumbnails? (featured images)', 'p2_theme'),
+							'type' => 'checkbox',
+							'default' => true
+						),
+						array(
+							'name' => 'post_thumbnail_width',
+							'label' => __('Post thumbnail width', 'p2_theme'),
+							'type' => 'integer',
+							'allowzero' => false,
+							'default' => 320
+						),
+						array(
+							'name' => 'post_thumbnail_height',
+							'label' => __('Post thumbnail height', 'p2_theme'),
+							'type' => 'integer',
+							'allowzero' => false,
+							'default' => 240
 						),
 						array(
 							'name' => 'excerpt_length',
 							'label' => __('Length of Post excerpts', 'p2_theme'),
 							'type' => 'integer',
+							'allowzero' => false,
 							'default' => 50
 						),
 						array(
 							'name' => 'excerpt_more',
 							'label' => __('"Read more" link text', 'p2_theme'),
 							'type' => 'text',
+							'allowempty' => false,
 							'default' => __('Read More&hellip;', 'p2_theme'),
 						),
 						array(
@@ -117,8 +141,17 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 						array(
 							'name' => 'use_post_formats',
 							'label' => __('Use post formats?', 'p2_theme'),
-							'type' => 'checkbox',
-							'default' => false
+							'type' => 'checkboxes',
+							'default' => array(),
+							'choices' => array(
+								'aside',
+								'image',
+								'video',
+								'audio',
+								'quote',
+								'link',
+								'gallery'
+							)
 						),
 						array(
 							'name' => 'use_boilerplate_htaccess',
@@ -258,19 +291,8 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 					"description" => __('Change the navigation bars.', 'p2_theme'),
 					"settings" => array(
 						array(
-							"name" => "primary_navbar_horizontal",
-						 	"label" => __( 'Horizontal alignment (primary)', 'p2_theme' ),
-							"type" => "radio",
-							"priority" => 1,
-							"default" => 'navbar-left',
-							"choices" => array(
-								'navbar-left' => "Left",
-								'navbar-right' => 'Right'
-							)
-						),
-						array(
-							"name" => "primary_navbar_vertical",
-						 	"label" => __( 'Vertical alignment (primary)', 'p2_theme' ),
+							"name" => "top_navbar_vertical",
+						 	"label" => __( 'Vertical alignment (top fixed navbar)', 'p2_theme' ),
 							"type" => "radio",
 							"priority" => 2,
 							"default" => 'navbar-fixed-top',
@@ -280,8 +302,8 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 							)
 						),
 						array(
-							"name" => "primary_navbar_colour",
-						 	"label" => __( 'Colour (primary)', 'p2_theme' ),
+							"name" => "top_navbar_colour",
+						 	"label" => __( 'Colour (top fixed navbar)', 'p2_theme' ),
 							"type" => "radio",
 							"priority" => 3,
 							"default" => 'navbar-default',
@@ -291,19 +313,8 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 							)
 						),
 						array(
-							"name" => "secondary_navbar_horizontal",
-						 	"label" => __( 'Horizontal alignment (secondary)', 'p2_theme' ),
-							"type" => "radio",
-							"priority" => 4,
-							"default" => 'navbar-left',
-							"choices" => array(
-								'navbar-left' => "Left",
-								'navbar-right' => 'Right'
-							)
-						),
-						array(
-							"name" => "secondary_navbar_colour",
-						 	"label" => __( 'Colour (secondary)', 'p2_theme' ),
+							"name" => "header_navbar_colour",
+						 	"label" => __( 'Colour (navbar under header)', 'p2_theme' ),
 							"type" => "radio",
 							"priority" => 5,
 							"default" => 'navbar-default',
@@ -495,9 +506,9 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 			}
 			settings_errors('p2_options');
 			print('<form method="post" action="options.php">');
-			//print('<pre>');
-			//print_r(self::get_theme_options());
-			//print('</pre>');
+			print('<pre>');
+			print_r(self::get_theme_options());
+			print('</pre>');
 			settings_fields('p2_options');
 			do_settings_sections('p2_options');
 			printf('<p><input type="submit" class="button-primary" name="submit" value="%s" /></p></form></div>', __('Save settings', 'p2_theme'));
@@ -574,6 +585,35 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 		}
 
 		/**
+		 * multiple checkbox field callback
+		 * @see add_settings_field()
+		 * @param array data passed to callback by add_settings_field
+		 */
+		public static function option_checkboxes($fielddata)
+		{
+			$options = self::get_theme_options();
+			$option_data = self::get_option_data();
+			$field = $fielddata["fieldname"];
+			$desc = isset($fielddata["description"]) ? $fielddata["description"] : "";
+			$choices = array();
+			foreach ($option_data as $section) {
+				foreach ($section["settings"] as $details) {
+					if ($details["name"] == $field && isset($details["choices"])) {
+						$choices = $details["choices"];
+					}
+				}
+			}
+			if (count($choices)) {
+				$count = 1;
+				foreach ($choices as $choice) {
+					$chckd = (in_array($choice, $options[$field]))? ' checked="checked"': '';
+					printf('<label for="id="p2_options_%s_%d"><input type="checkbox" id="p2_options_%s_%d" name="p2_options[%s][]" value="%s"%s /> %s</label><br />', $field, $count, $field, $count, $field, $choice, $chckd, $choice);
+					$count++;
+				}
+			}
+		}
+
+		/**
 		 * validation callback for register_setting function
 		 * @see register_theme_options()
 		 * @param array theme options to validate
@@ -587,19 +627,39 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 					foreach ($section["settings"] as $details) {
 						switch ($details["type"]) {
 							case "integer":
-								if (isset($theme_options[$details["name"]]) && trim($theme_options[$details["name"]]) != '') {
+								if (isset($theme_options[$details["name"]])) {
 									$theme_options[$details["name"]] = intval($theme_options[$details["name"]]);
 								} else {
+									$theme_options[$details["name"]] = $default_options[$details["name"]];
+								}
+								if ($details["allowzero"] === false && $theme_options[$details["name"]] == 0) {
+									$theme_options[$details["name"]] = $default_options[$details["name"]];	
+								}
+								break;
+							case 'text':
+								if (isset($theme_options[$details["name"]])) {
+									$theme_options[$details["name"]] = trim($theme_options[$details["name"]]);
+								} else {
+									$theme_options[$details["name"]] = $default_options[$details["name"]];
+								}
+								if ($details["allowempty"] === false && $theme_options[$details["name"]] == '') {
 									$theme_options[$details["name"]] = $default_options[$details["name"]];
 								}
 								break;
 							case "checkbox":
 								$theme_options[$details["name"]] = (isset($theme_options[$details["name"]]));
 								break;
+							case "checkboxes":
+								$selection = array();
+								foreach ($details["choices"] as $choice) {
+									if (in_array($choice, $theme_options[$details["name"]])) {
+										$selection[] = $choice;
+									}
+								}
+								$theme_options[$details["name"]] = $selection;
+								break;
 							default:
-								if (isset($theme_options[$details["name"]]) && trim($theme_options[$details["name"]]) != '') {
-									$theme_options[$details["name"]] = trim($theme_options[$details["name"]]);
-								} else {
+								if (!isset($theme_options[$details["name"]])) {
 									$theme_options[$details["name"]] = $default_options[$details["name"]];
 								}
 								break;

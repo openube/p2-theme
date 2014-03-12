@@ -1,6 +1,11 @@
-<?php if (has_nav_menu('top_navigation')) : ?>
+<?php 
+/* get theme options */
+$theme_options = p2_theme_options::get_theme_options();
+/* fixed navbar */
+if (has_nav_menu('top_navigation')) : 
+?>
 <!-- Fixed navbar -->
-<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+<div class="navbar <?php echo $theme_options['top_navbar_colour'] . ' ' . $theme_options['top_navbar_vertical']; ?>" id="top_navigation" role="navigation">
   <div class="container">
     <div class="header row">
       <div class="navbar-header">
@@ -27,9 +32,11 @@
     </div>
     
     <?php if (has_nav_menu('header_navigation')) : ?>
-    <nav class="navbar navbar-default" role="navigation">
-      <?php wp_nav_menu(array('theme_location' => 'header_navigation', 'menu_class' => 'nav navbar-nav')); ?>
-    </nav>
+    <div class="header-row">
+    	<nav class="navbar <?php echo $theme_options['header_navbar_colour']; ?>" id="header_navigation" role="navigation">
+        	<?php wp_nav_menu(array('theme_location' => 'header_navigation', 'menu_class' => 'nav navbar-nav')); ?>
+    	</nav>
+    </div>
     <?php endif; ?> 
 
   </div>

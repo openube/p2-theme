@@ -37,15 +37,11 @@ class p2
 	public static function register() {
 
 		/* get the theme options */
-		$options = p2_theme_options::get_theme_options();
+		$theme_options = p2_theme_options::get_theme_options();
+		//print('<pre>' . print_r($theme_options, true) . '</pre>');exit;
 
 		// Make theme available for translation
 		load_theme_textdomain('p2', get_template_directory() . '/lang');
-
-		// Add post thumbnails (http://codex.wordpress.org/Post_Thumbnails)
-		add_theme_support('post-thumbnails');
-		// set_post_thumbnail_size(150, 150, false);
-		// add_image_size('category-thumb', 300, 9999); // 300px wide (and unlimited height)
 
 		/*
 		 * Switches default core markup for search form, comment form,
@@ -54,7 +50,7 @@ class p2
 		add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list' ) );
 
 		// Tell the TinyMCE editor to use a custom stylesheet
-		add_editor_style('/css/editor-style.css');
+		add_editor_style('/editor-style.css');
 
 		// Enable /?s= to /search/ redirect
 		add_theme_support('nice-search');
@@ -65,15 +61,21 @@ class p2
 		/* theme wrapper */
 		add_filter('template_include', array(__CLASS__, 'wrap'), 99);
 
+		if ($theme_options['use_post_thumbnails']) {
+			// Add post thumbnails (http://codex.wordpruse_post_thumbnailsess.org/Post_Thumbnails)
+			add_theme_support('post-thumbnails');
+			set_post_thumbnail_size($theme_options['post_thumbnail_width'], $theme_options['post_thumbnail_height'], true);
+		}
+
 		/* add a custom background */
-		if ($options["use_custom_background"]) {
+		if ($theme_options["use_custom_background"]) {
 			add_theme_support( 'custom-background', array(
 				'default-color' => 'e6e6e6',
 			) );
 		}
 
 		/* add a custom header */
-		if ($options["use_custom_header"]) {
+		if ($theme_options["use_custom_header"]) {
 			$args = array(
 				'default-text-color'     => '220e10',
 				'default-image'          => '',
@@ -87,9 +89,17 @@ class p2
 		}
 
 		/* add HTML5 boilerplate .htaccess rules */
-		if ($options["use_boilerplate_htaccess"]) {
+		if ($theme_options["use_boilerplate_htaccess"]) {
 			add_theme_support('h5bp-htaccess');
 		}
+
+		/* use post formats */
+		if (count($theme_options["use_post_formats"])) {
+			add_theme_support('post-formats', $theme_options["use_post_formats"]);
+		}
+
+		/* make pagination in unordered lists */
+		add_filter( 'wp_link_pages_link', array(__CLASS__, 'wrap_pagination_links') );
 	}
 
 	/**
@@ -284,6 +294,14 @@ class p2
 		$style = ' style="color:#' . get_header_textcolor() . ';"';
 		printf('<h1><a id="name" onclick="return false;" href="#"%s>%s</a></h1>', $style, get_bloginfo( 'name' ));
 		print('</div>');
+	}
+
+	/**
+	 * wraps pagination links in <li> tags so they can be represented by unordered lists
+	 */
+	public static function wrap_pagination_links($link)
+	{
+		return '<li>' . $link . '</li>';
 	}
 	
 }

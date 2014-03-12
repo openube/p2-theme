@@ -1,21 +1,29 @@
-<?php if (!have_posts()) : ?>
+<?php
+/**
+ * template for displaying an archive of gallery posts
+ */
+if (!have_posts()) : ?>
   <div class="alert">
     <?php _e('Sorry, no results were found.', 'p2_theme'); ?>
   </div>
   <?php get_search_form(); ?>
 <?php endif; ?>
-
+<section class="galleries">
 <?php while (have_posts()) : the_post(); ?>
-  <article <?php post_class(); ?>>
-    <header>
+  <figure <?php post_class(); ?>>
+    <?php if (has_post_thumbnail()) : ?>
+    <a href="<?php the_permalink(); ?>"><?php the_post_thumbnail(); ?></a>
+    <?php endif; ?>
+    <figcaption>
       <h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
       <?php get_template_part('templates/entry-meta'); ?>
-    </header>
-    <div class="entry-summary">
-      <?php the_content(__('Continue reading&hellip;', 'p2_theme')); ?>
-    </div>
-    <?php get_template_part('templates/entry-footer'); ?>
-  </article>
+      <div class="entry-summary">
+        <?php the_excerpt(); ?>
+      </div>
+      <?php get_template_part('templates/entry-footer'); ?>
+    </figcaption>
+  </figure>
+</section>
 <?php endwhile; ?>
 
 <?php if ($wp_query->max_num_pages > 1) : ?>

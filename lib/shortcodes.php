@@ -129,31 +129,42 @@ class p2_shortcodes
 			return $output;
 		}
 
-		$output = '<ul class="thumbnails gallery">';
-		$i = 0;
+		$output = sprintf('<div id="carousel-%d" class="carousel slide" data-ride="carousel">', $instance);
+		$output .= '<ol class="carousel-indicators">';
+		$counter = 0;
+		$items = '';
 		foreach ($attachments as $id => $attachment) {
-			$link = isset($attr['link']) && 'file' == $attr['link'] ? wp_get_attachment_link($id, $size, false, false) : wp_get_attachment_link($id, $size, true, false);
-			$output .= '<li>' . $link;
-			if (trim($attachment->post_excerpt)) {
-				$output .= '<div class="caption hidden">' . wptexturize($attachment->post_excerpt) . '</div>';
-			}
-			$output .= '</li>';
+			$active = ($counter === 0)? 'active': '';
+			$output .= sprintf('<li data-target="#carousel-%d" data-slide-to="%d" class="%s"></li>', $instance, $counter, $active);
+			$src = wp_get_attachment_image_src($id, $size, false, false);
+        	$items .= sprintf('<div class="item %s"><img data-src="%s" alt="%s"></div>', $active, $src[0], esc_attr($attachment->post_title));
 		}
-		$output .= '</ul>';
+		$output .= sprintf('</ol><div class="carousel-inner">%s</div>', $items);
+		$output .= sprintf('<a class="left carousel-control" href="#carousel-%d" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>', $instance);
+		$output .= sprintf('<a class="right carousel-control" href="#carousel-%d" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>', $instance);
+		$output .= '</div>';
 		return $output;
 	}
 
-    static public function filter($c) {
-        // Run the loop, starting at level 1
-        $c = self::loop($c, 1, 'acc');
-        $c = self::loop($c, 1, 'tab');
+	/****************************************
+	 * Tabs and Accordions                  *
+	 ****************************************/
 
-        return $c;
+	/* keep track of used strings for IDs */
+	static private $used_names = array();
+
+	/* content filter */
+	public static function filter_content($content) {
+        // Run the loop, starting at level 1
+        $content = self::loop($content, 1, 'acc');
+        $content = self::loop($content, 1, 'tab');
+
+        return $content;
     }
 
     // $c is content, $l is the current tab level
-    static private function loop($c, $l, $t) {
-
+    private static function loop($c, $l, $t) 
+    {
         // The tab pattern - ain't it pretty
         $pattern = '/^.*\['.$t.':{'.$l.'}([^:][^\]]*)\].*$/im';
 
@@ -185,12 +196,9 @@ class p2_shortcodes
             return $c;
         }
 
-        // Current header level
-        $hl = ($l+self::$first_header_level < 6) ? $l+self::$first_header_level : 6;
-
         if ($t === 'tab') {
             // Setup link list
-            $link_list .= '<ul class="nav nav-tabs">';
+            $link_list = '<ul class="nav nav-tabs">';
         }
 
         // Inner keeps track of content

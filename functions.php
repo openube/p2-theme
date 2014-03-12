@@ -13,3 +13,4 @@ locate_template('lib/setup.php', true, true);		/* Theme setup */
 locate_template('lib/navigation.php', true, true);	/* Navigation definitions and mods */
 locate_template('lib/comments.php', true, true);	/* Custom comments mods */
 locate_template('lib/scripts.php', true, true);		/* Scripts and stylesheets */
+locate_template('lib/shortcodes.php', true, true);  /* Shortcodes */

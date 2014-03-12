@@ -51,22 +51,24 @@ module.exports = function(grunt) {
       }
     },
     less: {
-      production: {
-        options: {
-          paths: ["css/less"],
-          cleancss:true
-        },
-        files: {
-          "css/style.min.css": "css/less/style.less"
-        }
-      },
       tinmymce: {
         options: {
+          banner: '/*!\n * <%= pkg.name => TinyMCE Stylesheet\n * @version: <%= pkg.version =>\n * @author: <%=pkg.author %>\n */',
           paths: ["css/less"],
           cleancss:true
         },
         files: {
-          "css/editor-style.css": "css/less/editor-style.less"
+          "ueditor-style.css": "css/less/editor-style.less"
+        }
+      },
+      theme: {
+      	options: {
+          banner: '/*!\nTheme Name: <%= pkg.name %>\nTheme URI: <%= pkg.homepage %>\nDescription: <%= pkg.description %>\nVersion: <%= pkg.version %>\nAuthor: <%= pkg.author %>\nAuthor URI: <%= pkg.authoruri %>\nLicense: <%= pkg.license %>\nLicense URI: <%= pkg.licenseuri %>\n*/',
+          paths: ["css/less"],
+          cleancss:true
+      	},
+        files: {
+          "style.css": "css/less/style.less"
         }
       },
       development: {
@@ -78,15 +80,16 @@ module.exports = function(grunt) {
           "css/style.css": "css/less/style.less"
         }
       }
-    }
+    },
   });
 
   // Load the plugin that provides the "uglify" task.
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-less');
+  grunt.loadNpmTasks('grunt-text-replace');
 
   // Default task(s).
-  grunt.registerTask('default', ['less:development']);
+  grunt.registerTask('default', ['less:development', 'concat:applyHeader']);
 
 };
