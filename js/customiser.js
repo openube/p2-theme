@@ -60,6 +60,7 @@
 	// this function is called when the customizer interface updates a value
 	function changeSetting(setting, newval)
 	{
+		console.log(setting);
 		for (var i = 0; i < cs.length; i++) {
 			if (cs[i].settings.length) {
 				for (var j = 0; j < cs[i].settings.length; j++) {

@@ -65,6 +65,9 @@ class p2_shortcodes
 	public static function gallery($attr)
 	{
 		$post = get_post();
+		if (!$post) {
+			return;
+		}
 		static $instance = 0;
 		$instance++;
 

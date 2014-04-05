@@ -3,10 +3,6 @@
 	<header class="page-header">
 		<h2><?php the_title(); ?></h2>
 	</header>
-	<?php
-	$options = p2_theme_options::get_theme_options();
-	print_r($options);
-	?>
 
 	<?php the_content(); ?>
   	

@@ -47,23 +47,23 @@
 		<?php if (get_option('comment_registration') && !is_user_logged_in()) : ?>
 			<p><?php printf(__('You must be <a href="%s">logged in</a> to post a comment.', 'p2_theme'), wp_login_url(get_permalink())); ?></p>
 		<?php else : ?>
-			<form action="<?php echo get_option('siteurl'); ?>/wp-comments-post.php" method="post" id="commentform">
+			<form class="form-horizontal" action="<?php echo get_option('siteurl'); ?>/wp-comments-post.php" method="post" id="commentform">
 				<?php if (is_user_logged_in()) : ?>
 					<p>
 						<?php printf(__('Logged in as <a href="%s/wp-admin/profile.php">%s</a>.', 'p2_theme'), get_option('siteurl'), $user_identity); ?>
 						<a href="<?php echo wp_logout_url(get_permalink()); ?>" title="<?php __('Log out of this account', 'p2_theme'); ?>"><?php _e('Log out &raquo;', 'p2_theme'); ?></a>
 					</p>
 				<?php else : ?>
-					<label for="author"><?php _e('Name', 'p2_theme'); if ($req) _e(' (required)', 'p2_theme'); ?></label>
-					<input type="text" class="text" name="author" id="author" value="<?php echo esc_attr($comment_author); ?>" size="22" <?php if ($req) echo 'aria-required="true"'; ?>>
-					<label for="email"><?php _e('Email (will not be published)', 'p2_theme'); if ($req) _e(' (required)', 'p2_theme'); ?></label>
-					<input type="email" class="text" name="email" id="email" value="<?php echo esc_attr($comment_author_email); ?>" size="22" <?php if ($req) echo 'aria-required="true"'; ?>>
-					<label for="url"><?php _e('Website', 'p2_theme'); ?></label>
-					<input type="url" class="text" name="url" id="url" value="<?php echo esc_attr($comment_author_url); ?>" size="22">
+					<label for="author" class="control-label"><?php _e('Name', 'p2_theme'); if ($req) _e(' (required)', 'p2_theme'); ?></label>
+					<input class="form-control" type="text" class="text" name="author" id="author" value="<?php echo esc_attr($comment_author); ?>" size="22" <?php if ($req) echo 'aria-required="true"'; ?>>
+					<label for="email" class="control-label"><?php _e('Email (will not be published)', 'p2_theme'); if ($req) _e(' (required)', 'p2_theme'); ?></label>
+					<input class="form-control" type="email" class="text" name="email" id="email" value="<?php echo esc_attr($comment_author_email); ?>" size="22" <?php if ($req) echo 'aria-required="true"'; ?>>
+					<label for="url" class="control-label"><?php _e('Website', 'p2_theme'); ?></label>
+					<input class="form-control" type="url" class="text" name="url" id="url" value="<?php echo esc_attr($comment_author_url); ?>" size="22">
 				<?php endif; ?>
-				<label for="comment"><?php _e('Comment', 'p2_theme'); ?></label>
-				<textarea name="comment" id="comment" class="input-xlarge" rows="5" aria-required="true"></textarea>
-				<p><input name="submit" class="btn btn-primary" type="submit" id="submit" value="<?php _e('Submit Comment', 'p2_theme'); ?>"></p>
+				<label for="comment" class="control-label"><?php _e('Comment', 'p2_theme'); ?></label>
+				<textarea class="form-control" name="comment" id="comment" class="input-xlarge" rows="5" aria-required="true"></textarea>
+				<p><input class="btn btn-primary" name="submit" type="submit" id="submit" value="<?php _e('Submit Comment', 'p2_theme'); ?>"></p>
 				<?php comment_id_fields(); ?>
 				<?php do_action('comment_form', $post->ID); ?>
 			</form>

@@ -10,9 +10,9 @@ if ( 'post' == get_post_type() ) {
 }
 if ( ! post_password_required() && ( comments_open() || get_comments_number() ) ) {
 ?>
-<span class="comments-link"><?php comments_popup_link( __( 'Leave a comment', 'p2_theme' ), __( '1 Comment', 'p2_theme' ), __( '% Comments', 'p2_theme' ) ); ?></span>
+ | <span class="comments-link"><?php comments_popup_link( __( 'Leave a comment', 'p2_theme' ), __( '1 Comment', 'p2_theme' ), __( '% Comments', 'p2_theme' ) ); ?></span>
 <?php
 }
-edit_post_link( __( 'Edit', 'p2_theme' ), '<span class="edit-link">', '</span>' );
+edit_post_link( __( 'Edit', 'p2_theme' ), ' | <span class="edit-link">', '</span>' );
 ?>
 </p>
