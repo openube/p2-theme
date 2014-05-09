@@ -13,3 +13,6 @@
 [submodule "roots"]
 	path = roots
 	url = https://github.com/roots/roots.git
+[submodule "bxslider-4"]
+	path = bxslider-4
+	url = https://github.com/stevenwanderski/bxslider-4.git
