@@ -16,3 +16,9 @@
 [submodule "bxslider-4"]
 	path = bxslider-4
 	url = https://github.com/stevenwanderski/bxslider-4.git
+[submodule "jquery-backstretch"]
+	path = jquery-backstretch
+	url = https://github.com/srobbin/jquery-backstretch.git
+[submodule "p2_media_image_select"]
+	path = p2_media_image_select
+	url = git@github.com:bjorsq/p2_media_image_select.git
