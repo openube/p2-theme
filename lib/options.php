@@ -5,7 +5,7 @@
  * @version 1.0
  */
 
-if ( ! class_exists( 'p2_theme_options' ) ) :
+if ( ! class_exists( 'p2_theme_options' ) ) {
 
 	/**
 	 * class to add options for the theme
@@ -675,16 +675,6 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 		 ***********************************************/
 
 		/**
-		 * enqueues the script to enable real-time customisation of theme options
-		 * Used by hook: 'customize_preview_init'
-		 */
-		public static function register_customiser_script()
-		{
-			wp_enqueue_script('p2_customiser_script', get_template_directory_uri() . '/js/customiser.js', array( 'jquery','customize-preview' ), p2::$version, true );
-		}
-
-
-		/**
 		 * This outputs the json needed by the live settings javascript to tell it 
 		 * which settings affect which parts of the page.
 		 * Used by ajax hook: 'wp_ajax_customiser_options'
@@ -814,4 +804,4 @@ if ( ! class_exists( 'p2_theme_options' ) ) :
 	}
 	p2_theme_options::register();
 
-endif;
+}

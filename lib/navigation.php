@@ -5,126 +5,126 @@
  * @version 1.0
  */
 
-if ( ! class_exists( 'p2_navigation' )) :
+if ( ! class_exists( 'p2_navigation' ) ) {
 
-class p2_navigation
-{
-	public static function register()
+	class p2_navigation
 	{
-		/* register menus */
-		add_action( 'after_setup_theme', array(__CLASS__, 'register_nav_menus') );
-		/* register sidebars */
-		add_action( 'widgets_init', array(__CLASS__, 'register_sidebars') );
-		/* tidy up menu generation */
-		add_filter( 'nav_menu_css_class', array(__CLASS__, 'nav_menu_css_class'), 10, 2 );
-		add_filter( 'nav_menu_item_id', '__return_null' );
-		add_filter( 'wp_nav_menu_args', array(__CLASS__, 'nav_menu_args') );
-	}
-
-	/**
-	 * Registers navigation menus
-	 */
-	public static function register_nav_menus()
-	{
-		register_nav_menus(array(
-			'top_navigation' => 'Top navigation (fixed above header)',
-			'header_navigation' => 'Top navigation (static below header)',
-			'footer_navigation' => 'Footer Navigation'
-		));
-	}
-
-	/**
-	 * Registers sidebars
-	 */
-	public static function register_sidebars()
-	{
-		/* Sidebars */
-		register_sidebar(array(
-			'name'			=> 'Global Sidebar',
-			'description'	=> 'Sidebar added to all pages and posts on the site',
-			'id'			=> 'global-sidebar',
-			'before_widget' => '<section class="global-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
-			'after_widget'	=> '</div></section>',
-			'before_title'	=> '<h3>',
-			'after_title'   => '</h3>',
-		));
-		register_sidebar(array(
-			'name'			=> 'Posts Sidebar',
-			'description'	=> 'Sidebar added posts and post archives',
-			'id'			=> 'posts-sidebar',
-			'before_widget' => '<section class="posts-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
-			'after_widget'	=> '</div></section>',
-			'before_title'	=> '<h3>',
-			'after_title'   => '</h3>',
-		));
-		register_sidebar(array(
-			'name'			=> 'Pages sidebar',
-			'description'	=> 'Sidebar added to pages',
-			'id'			=> 'pages-sidebar',
-			'before_widget' => '<section class="pages-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
-			'after_widget'	=> '</div></section>',
-			'before_title'	=> '<h3>',
-			'after_title'	=> '</h3>',
-		));
-		register_sidebar(array(
-			'name'			=> 'Footer sidebar',
-			'description'	=> 'Sidebar added to footer above footer menu',
-			'id'			=> 'footer-sidebar',
-			'before_widget' => '<section class="footer-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
-			'after_widget'	=> '</div></section>',
-			'before_title'	=> '<h3>',
-			'after_title'	=> '</h3>',
-		));
-	}
-
-	/**
-	 * Remove the id="" on nav menu items
-	 * Return 'menu-slug' for nav menu classes
-	 */
-	public static function nav_menu_css_class($classes, $item)
-	{
-		$slug = sanitize_title($item->title);
-		$classes = preg_replace('/(current(-menu-|[-_]page[-_])(item|parent|ancestor))/', 'active', $classes);
-		$classes = preg_replace('/^((menu|page)[-_\w+]+)+/', '', $classes);
-
-		$classes[] = 'menu-' . $slug;
-
-		$classes = array_unique($classes);
-
-		return array_filter($classes, array(__CLASS__, 'is_element_empty'));
-	}
-
-	/**
-	 * Clean up wp_nav_menu_args
-	 *
-	 * Remove the container
-	 * Use p2_Nav_Walker() by default
-	 */
-	public static function nav_menu_args($args = '')
-	{
-		$nav_menu_args['container'] = false;
-		if (!$args['items_wrap']) {
-			$nav_menu_args['items_wrap'] = '<ul class="%2$s">%3$s</ul>';
+		public static function register()
+		{
+			/* register menus */
+			add_action( 'after_setup_theme', array(__CLASS__, 'register_nav_menus') );
+			/* register sidebars */
+			add_action( 'widgets_init', array(__CLASS__, 'register_sidebars') );
+			/* tidy up menu generation */
+			add_filter( 'nav_menu_css_class', array(__CLASS__, 'nav_menu_css_class'), 10, 2 );
+			add_filter( 'nav_menu_item_id', '__return_null' );
+			add_filter( 'wp_nav_menu_args', array(__CLASS__, 'nav_menu_args') );
 		}
-		$nav_menu_args['depth'] = 3;
-		if (!$args['walker']) {
-			$nav_menu_args['walker'] = new p2_Nav_Walker();
-		}
-		return array_merge($args, $nav_menu_args);
-	}
 
-	/**
-	 * array_filter callback to identify empty elements
-	 */
-	public static function is_element_empty($element)
-	{
-		$element = trim($element);
-		return empty($element) ? false : true;
+		/**
+		 * Registers navigation menus
+		 */
+		public static function register_nav_menus()
+		{
+			register_nav_menus(array(
+				'top_navigation' => 'Top navigation (fixed above header)',
+				'header_navigation' => 'Top navigation (static below header)',
+				'footer_navigation' => 'Footer Navigation'
+			));
+		}
+
+		/**
+		 * Registers sidebars
+		 */
+		public static function register_sidebars()
+		{
+			/* Sidebars */
+			register_sidebar(array(
+				'name'			=> 'Global Sidebar',
+				'description'	=> 'Sidebar added to all pages and posts on the site',
+				'id'			=> 'global-sidebar',
+				'before_widget' => '<section class="global-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
+				'after_widget'	=> '</div></section>',
+				'before_title'	=> '<h3>',
+				'after_title'   => '</h3>',
+			));
+			register_sidebar(array(
+				'name'			=> 'Posts Sidebar',
+				'description'	=> 'Sidebar added posts and post archives',
+				'id'			=> 'posts-sidebar',
+				'before_widget' => '<section class="posts-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
+				'after_widget'	=> '</div></section>',
+				'before_title'	=> '<h3>',
+				'after_title'   => '</h3>',
+			));
+			register_sidebar(array(
+				'name'			=> 'Pages sidebar',
+				'description'	=> 'Sidebar added to pages',
+				'id'			=> 'pages-sidebar',
+				'before_widget' => '<section class="pages-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
+				'after_widget'	=> '</div></section>',
+				'before_title'	=> '<h3>',
+				'after_title'	=> '</h3>',
+			));
+			register_sidebar(array(
+				'name'			=> 'Footer sidebar',
+				'description'	=> 'Sidebar added to footer above footer menu',
+				'id'			=> 'footer-sidebar',
+				'before_widget' => '<section class="footer-sidebar-widget widget %1$s %2$s"><div class="widget-inner">',
+				'after_widget'	=> '</div></section>',
+				'before_title'	=> '<h3>',
+				'after_title'	=> '</h3>',
+			));
+		}
+
+		/**
+		 * Remove the id="" on nav menu items
+		 * Return 'menu-slug' for nav menu classes
+		 */
+		public static function nav_menu_css_class($classes, $item)
+		{
+			$slug = sanitize_title($item->title);
+			$classes = preg_replace('/(current(-menu-|[-_]page[-_])(item|parent|ancestor))/', 'active', $classes);
+			$classes = preg_replace('/^((menu|page)[-_\w+]+)+/', '', $classes);
+
+			$classes[] = 'menu-' . $slug;
+
+			$classes = array_unique($classes);
+
+			return array_filter($classes, array(__CLASS__, 'is_element_empty'));
+		}
+
+		/**
+		 * Clean up wp_nav_menu_args
+		 *
+		 * Remove the container
+		 * Use p2_Nav_Walker() by default
+		 */
+		public static function nav_menu_args($args = '')
+		{
+			$nav_menu_args['container'] = false;
+			if (!$args['items_wrap']) {
+				$nav_menu_args['items_wrap'] = '<ul class="%2$s">%3$s</ul>';
+			}
+			$nav_menu_args['depth'] = 3;
+			if (!$args['walker']) {
+				$nav_menu_args['walker'] = new p2_Nav_Walker();
+			}
+			return array_merge($args, $nav_menu_args);
+		}
+
+		/**
+		 * array_filter callback to identify empty elements
+		 */
+		public static function is_element_empty($element)
+		{
+			$element = trim($element);
+			return empty($element) ? false : true;
+		}
 	}
+	p2_navigation::register();
+
 }
-p2_navigation::register();
-
-endif;
 	
 
 /**

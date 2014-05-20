@@ -1,0 +1,33 @@
+.media-selection-control,
+.media-selection-button {
+ 	clear:both;
+}
+.media-selection-preview div.image-container {
+ 	padding:10px;
+ 	float:left;
+ 	cursor:move;
+}
+.media-selection-preview.multiple div.image-container {
+ 	cursor:move;
+}
+.media-selection-preview div.image-container div.image-inner {
+	position:relative;
+}
+.media-selection-preview div.image-container div.image-inner a.remove-image {
+	z-index:999;
+	display:none;
+	font-family:'dashicons';
+	font-size:30px;
+	line-height:30px;
+	position:absolute;
+	text-decoration:none;
+	padding:5px;
+	top:0;
+	right:0;
+	background:rgba(0,0,0,0.5);
+	color:#fff;
+	cursor:pointer;
+}
+.media-selection-preview div.image-container div.image-inner:hover a.remove-image {
+	display:inline-block;
+}
