@@ -105,10 +105,7 @@ if ( ! class_exists('p2_theme_scripts') ) {
 			/* enqueue media library scripts */
 	        wp_enqueue_media();
 
-			/**
-			 * this assumes the code is part of a plugin, so uses plugin_url to determine the
-			 * url of the script file - adjust using get_stylesheet_directory_uri or get_template_directory_uri
-			 */
+			/* theme admin scripts */
 			wp_enqueue_script(
 				'p2-theme-admin-script', 
 				get_template_directory_uri() . '/js/admin.js', 
@@ -129,7 +126,7 @@ if ( ! class_exists('p2_theme_scripts') ) {
 			);
 			wp_enqueue_style(
 				'p2-theme-admin-style',
-				get_template_directory_uri() . '/css/admin.js',
+				get_template_directory_uri() . '/css/admin.css',
 				array( 'dashicons' ),
 				p2::$version
 			);

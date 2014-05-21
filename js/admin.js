@@ -8,10 +8,6 @@
 	/* configuration for image inputs */
  	var thumb_size = 'thumbnail',
 
-	/* selectors for the buttons which activate the media browser */
-	selector_multiple = '.mediaBrowserButtonImages',
-	selector_single = '.mediaBrowserButtonImage',
-
 	/* shortcut to set an input value */
 	setInputValue = function(inputID, value)
 	{
@@ -72,11 +68,11 @@
 		checkBackgroundForm();
 	});
 	/* set up form on page load */
-	checkBackgroundForm()
+	checkBackgroundForm();
 
 	/* activate colour pickers */
 	if ($('.color-picker-hex').length) {
-		$('.color-picker-hex').wpColorPicker();
+		//$('.color-picker-hex').wpColorPicker();
 	}
 
  	/* make image preview sortable */
@@ -107,7 +103,7 @@
 	/**
 	 * activate media uploader to select multiple images for a slideshow
 	 */
-	$(document).on('click', selector_multiple, function(e) {
+	$(document).on('click', '.mediaBrowserButtonImages', function(e) {
 		e.preventDefault();
 		/* if there is a frame created, use it */
 		if ( frame ) {
@@ -170,7 +166,7 @@
 	/**
 	 * open media browser to select a single image and insert its URL
 	 */
-	$(document).on('click', selector_single, function(e) {
+	$(document).on('click', '.mediaBrowserButtonImage', function(e) {
 		e.preventDefault();
 		/* if there is a frame created, use it */
 		if ( imgframe ) {

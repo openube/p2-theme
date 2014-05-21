@@ -10,14 +10,14 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 	class p2_custom_background
 	{
 		/**
-		 * gradient_types array
+		 * gradient_options array
 		 */
-		public static $gradient_types = array();
+		public static $gradient_options = array();
 
 		/**
-		 * tile types array
+		 * repeat options array
 		 */
-		public static $tile_types = array();
+		public static $repeat_options = array();
 
 		/**
 		 * registers all the methiods of the class with the Wordpress API
@@ -38,19 +38,25 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 	        /* register settings */
 	        add_action( 'admin_init', array(__CLASS__, 'register_background_options') );
 
-	        /* set gradient types */
-	        self::$gradient_types['horizontal2'] = __('Horizontal, two colours', 'p2_theme');
-			self::$gradient_types['horizontal3'] = __('Horizontal, three colours', 'p2_theme');
-			self::$gradient_types['vertical2'] = __('Vertical, two colours', 'p2_theme');
-			self::$gradient_types['vertical3'] = __('Vertical, three colours', 'p2_theme');
-			self::$gradient_types['directional'] = __('Directional', 'p2_theme');
-			self::$gradient_types['radial'] = __('Radial', 'p2_theme');
+			/* Output custom CSS for options */
+			add_action( 'wp_head', array(__CLASS__, 'wp_head') );
+			/* Add google analytics to the footer */
+			add_action( 'wp_footer', array(__CLASS__, 'wp_footer'), 20);
 
-			/* set tile types */
-			self::$tile_types['repeat-x'] = __('Repeat horizontally', 'p2_theme');
-			self::$tile_types['repeat-y'] = __('Repeat vertically', 'p2_theme');
-			self::$tile_types['no-repeat'] = __('Do not repeat image', 'p2_theme');
-			self::$tile_types['tile'] = __('Tile', 'p2_theme');
+	        /* set gradient types */
+	        self::$gradient_options['horizontal2'] = __('Horizontal, two colours', 'p2_theme');
+			self::$gradient_options['horizontal3'] = __('Horizontal, three colours', 'p2_theme');
+			self::$gradient_options['vertical2'] = __('Vertical, two colours', 'p2_theme');
+			self::$gradient_options['vertical3'] = __('Vertical, three colours', 'p2_theme');
+			self::$gradient_options['directional'] = __('Directional', 'p2_theme');
+			self::$gradient_options['radial'] = __('Radial', 'p2_theme');
+
+			/* set repeat types */
+			self::$repeat_options['repeat-x'] = __('Repeat horizontally', 'p2_theme');
+			self::$repeat_options['repeat-y'] = __('Repeat vertically', 'p2_theme');
+			self::$repeat_options['no-repeat'] = __('Do not repeat image', 'p2_theme');
+			self::$repeat_options['repeat'] = __('Tile', 'p2_theme');
+			self::$repeat_options['stretch'] = __('Stretch', 'p2_theme');
 
 		}
 
@@ -78,12 +84,10 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 			print('<pre>');
 			print_r(self::get_background_options());
 			print('</pre>');
-			settings_fields('p2_background_colour');
+			settings_fields('p2_background_options');
 			do_settings_sections('p2_background_colour');
-			settings_fields('p2_background_image');
 			do_settings_sections('p2_background_image');
-
-			print('</div>');
+			printf('<p><input type="submit" class="button-primary" name="submit" value="%s" /></p></form></div>', __('Save settings', 'p2_theme'));
 		}
 
 
@@ -195,14 +199,15 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							$background_options[$details["name"]] = (isset($background_options[$details["name"]]));
 							break;
 						case "colour":
-							if (isset($background_options[$details["name"]]) && preg_match('/^#[0-9a-f]{3, 6}]$', trim(strtolower($background_options[$details["name"]])))) {
+							if (isset($background_options[$details["name"]]) && preg_match('/^#[0-9a-f]{3,6}$/', trim(strtolower($background_options[$details["name"]])))) {
 								$background_options[$details["name"]] = trim(strtolower($background_options[$details["name"]]));
 							} else {
+								add_settings_error('p2_background_options[' . $details["name"] . ']', 'invalid_colour', __('Invalid color specified for background - please use hexadecimal colours only here'));
 								$background_options[$details["name"]] = $default_options[$details["name"]];
 							}
 							break;
 						case "gradient_type":
-							if ( ! in_array($background_options[$details["name"]], array_keys(self::$gradient_types))) {
+							if ( ! in_array($background_options[$details["name"]], array_keys(self::$gradient_options))) {
 								$background_options[$details["name"]] = $default_options[$details["name"]];
 							}
 							break;
@@ -217,6 +222,27 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							if ($val >= 0 && $val <= 100) {
 								$background_options[$details["name"]] = $val;
 							}
+							break;
+						case "background_repeat":
+							if ( ! in_array($background_options[$details["name"]], array_keys(self::$repeat_options))) {
+								$background_options[$details["name"]] = $default_options[$details["name"]];
+							}
+							break;
+						case "background_position":
+							$val = trim($background_options[$details["name"]]);
+							$keywords = '(top|bottom|left|right|center)';
+							$units = '(%|em|px)';
+							if (preg_match('/^' . $keywords . '$/', $val) ||
+							    preg_match('/^' . $keywords . ' ' . $keywords . '$/', $val) ||
+							    preg_match('/^[0-9]+' . $units . '$/', $val) ||
+								preg_match('/^[0-9]+' . $units . ' [0-9]+' . $units . '$/', $val) ||
+								preg_match('/^' . $keywords . ' [0-9]+' . $units . '$/', $val) ||
+							    preg_match('/^[0-9]+' . $units . ' ' . $keywords . '$/', $val)) {
+							    $background_options[$details["name"]] = $val;
+							} else {
+								$background_options[$details["name"]] = $default_options[$details["name"]];	
+							}
+							break;
 					}
 				}
 			}
@@ -242,7 +268,7 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							'name' => 'colour',
 							'label' => __('Background colour', 'p2_theme'),
 							'type' => 'colour',
-							'default' => '#fff'
+							'default' => '#ffffff'
 						),
 						array(
 							'name' => 'gradient',
@@ -266,31 +292,31 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							'name' => 'gradient1',
 							'label' => __('First colour in gradient', 'p2_theme'),
 							'type' => 'colour',
-							'default' => '#fff'
+							'default' => '#ffffff'
 						),
 						array(
 							'name' => 'colour_stop1',
 							'label' => __('First colour stop', 'p2_theme'),
 							'type' => 'colour_stop',
-							'default' => '0%'
+							'default' => '0'
 						),
 						array(
 							'name' => 'gradient2',
 							'label' => __('Second colour in gradient', 'p2_theme'),
 							'type' => 'colour',
-							'default' => '#fff'
+							'default' => '#ffffff'
 						),
 						array(
 							'name' => 'colour_stop2',
 							'label' => __('Second colour stop', 'p2_theme'),
 							'type' => 'colour_stop',
-							'default' => '100%'
+							'default' => '100'
 						),
 						array(
 							'name' => 'gradient3',
 							'label' => __('Third colour in gradient', 'p2_theme'),
 							'type' => 'colour',
-							'default' => '#fff'
+							'default' => '#ffffff'
 						)
 					)
 				),
@@ -308,16 +334,16 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							'default' => ''
 						),
 						array(
-							'name' => 'image_tile',
+							'name' => 'background_repeat',
 							'label' => __('Repeat the image?', 'p2_theme'),
-							'type' => 'image_tile',
-							'default' => 'none'
+							'type' => 'background_repeat',
+							'default' => 'no-repeat'
 						),
 						array(
-							'name' => 'image_position',
+							'name' => 'background_position',
 							'label' => __('Image position', 'p2_theme'),
-							'type' => 'image_position',
-							'default' => ''
+							'type' => 'background_position',
+							'default' => 'top left'
 						),
 						array(
 							'name' => 'image_slides',
@@ -329,13 +355,13 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							'name' => 'image_transition',
 							'label' => __('Speed of transition (ms)', 'p2_theme'),
 							'type' => 'integer',
-							'default' => ''
+							'default' => '500'
 						),
 						array(
 							'name' => 'image_pause',
 							'label' => __('Pause between slides (ms)', 'p2_theme'),
 							'type' => 'integer',
-							'default' => ''
+							'default' => '5000'
 						)
 					)
 				)
@@ -496,7 +522,7 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 			$name = $fielddata["name"];
 			$value = (isset($options[$name]) && trim($options[$name]) != "") ? trim($options[$name]) : "";
 			printf('<p><select name="p2_background_options[%s]" id="p2_background_options_%s">', $name, $name);
-			foreach (self::$gradient_types as $type => $label) {
+			foreach (self::$gradient_options as $type => $label) {
 				$sel = $value == $type? ' selected': '';
 				printf('<option value="%s"%s>%s</option>', $type, $sel, $label);	
 			}
@@ -521,13 +547,13 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 		 * @see add_settings_field()
 		 * @param array data passed to callback by add_settings_field
 		 */ 
-		public static function option_image_tile($fielddata)
+		public static function option_background_repeat($fielddata)
 		{
 			$options = self::get_background_options();
 			$name = $fielddata["name"];
 			$value = (isset($options[$name]) && trim($options[$name]) != "") ? trim($options[$name]) : "";
 			printf('<p><select name="p2_background_options[%s]" id="p2_background_options_%s">', $name, $name);
-			foreach (self::$tile_types as $type => $label) {
+			foreach (self::$repeat_options as $type => $label) {
 				$sel = $value == $type? ' selected': '';
 				printf('<option value="%s"%s>%s</option>', $type, $sel, $label);	
 			}
@@ -539,10 +565,11 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 		 * @see add_settings_field()
 		 * @param array data passed to callback by add_settings_field
 		 */ 
-		public static function option_image_position($fielddata)
+		public static function option_background_position($fielddata)
 		{
-			$options = self::get_background_options();
-
+			$fielddata["class"] = 'integer';
+			$fielddata["desc"] = __('Position can use keywords <em>top</em>, <em>bottom</em>, <em>left</em> or <em>right</em>. Alternatively, values can be entered in pixels, percentages or ems.');
+			self::option_text($fielddata);
 		}
 
 		/**
@@ -550,7 +577,7 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 		 */
 		public static function wp_head()
 		{
-			$out = '<style type="text/css">';
+			$out = '<style type="text/css">html {';
 			$options = self::get_background_options();
 			if ($options['gradient']) {
 				switch ('gradient_type') {
@@ -594,10 +621,42 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 						$out .= 'background-repeat: no-repeat;';
 						break;
 				}
+			} elseif ( ! empty($options["image"]) && $options['background_repeat'] != 'stretch' ) {
+				if ( $imagesrc = wp_get_attachment_image_src($options["image"]) ) {
+					$out .= sprintf('background-image:url(%s);', $imagesrc[0]);
+					$out .= sprintf('background-repeat:%s;', $options['background_repeat']);
+					$out .= sprintf('background-position:%s;', $options["background_position"]);
+				}
 			}
+			$out .= '}</style>';
+			print($out);
+		}
 
-			$out .= '</style>';
-			return $out;
+		/**
+		 * add backstretch initilisation to the page footer
+		 * Used by hook: 'wp_footer'
+		 */
+		public static function wp_footer()
+		{
+			$options = self::get_background_options();
+			$images = array();
+			if ( ! empty($options["image"]) && $options['background_repeat'] == 'stretch' ) {
+				if ($imagesrc = wp_get_attachment_image_src($options["image"])) {
+					print("<p>single image</p><pre>" . print_r($imagesrc, true) . '</pre>');
+				}
+			} elseif ( ! empty($options["image_slides"])) {
+				$slide_ids = explode(',', $options["image_slides"]);
+				$images = array();
+				foreach ($slide_ids as $slide_id) {
+					if ($imagesrc = wp_get_attachment_image_src($slide_id)) {
+						$images[] = $imagesrc;
+					}
+				}
+				if ( count($images) ) {
+					print("<p>multiple images</p><pre>" . print_r($images, true) . '</pre>');
+				}
+
+			}
 		}
 	}
 	p2_custom_background::register();

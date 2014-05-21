@@ -86,6 +86,15 @@ module.exports = function(grunt) {
 					"css/style.min.css": "css/less/style.less"
 				}
 			},
+			admin: {
+				options: {
+					paths: ["css/less","bootstrap/less"],
+					cleancss:true
+				},
+				files: {
+					"css/admin.css": "css/less/admin.less"
+				}
+			},
 			development: {
 				options: {
 					paths: ["css/less","bootstrap/less"],
