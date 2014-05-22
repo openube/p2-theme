@@ -78,15 +78,10 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 			if (isset($_REQUEST['settings-updated']) && $_REQUEST['settings-updated'] == "true") {
 				printf('<div id="message" class="updated"><p><strong>%s</strong></p></div>', __('Settings saved', 'p2_theme'));
 			}
-			settings_errors('p2_background_colour');
-			settings_errors('p2_background_image');
+			settings_errors('p2_background_options');
 			print('<form method="post" action="options.php">');
-			print('<pre>');
-			print_r(self::get_background_options());
-			print('</pre>');
 			settings_fields('p2_background_options');
-			do_settings_sections('p2_background_colour');
-			do_settings_sections('p2_background_image');
+			do_settings_sections('p2_background_options');
 			printf('<p><input type="submit" class="button-primary" name="submit" value="%s" /></p></form></div>', __('Save settings', 'p2_theme'));
 		}
 
@@ -243,6 +238,11 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 								$background_options[$details["name"]] = $default_options[$details["name"]];	
 							}
 							break;
+						case "additional":
+							if ( ! isset($background_options[$details["name"]]) || ! in_array($background_options[$details["name"]], array("gradient", "single", "multiple")) ) {
+								$background_options[$details["name"]] = false;
+							}
+							break;
 					}
 				}
 			}
@@ -258,9 +258,9 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 		{
 			return array(
 				array(
-					'name' => 'p2_background_colour',
-					'page' => 'p2_background_colour',
-					'title' => __('Background colour', 'p2_theme'),
+					'name' => 'p2_background_options',
+					'page' => 'p2_background_options',
+					'title' => __('Background Options', 'p2_theme'),
 					'capability' => 'edit_theme_options',
 					'description' => __('Allows you to customize the site background colour.', 'p2_theme'),
 					'settings' => array(
@@ -271,9 +271,9 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							'default' => '#ffffff'
 						),
 						array(
-							'name' => 'gradient',
-							'label' => __('Use a gradient for the background?', 'p2_theme'),
-							'type' => 'checkbox',
+							'name' => 'additional',
+							'label' => __('Additional options', 'p2_theme'),
+							'type' => 'additional',
 							'default' => false
 						),
 						array(
@@ -317,18 +317,9 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							'label' => __('Third colour in gradient', 'p2_theme'),
 							'type' => 'colour',
 							'default' => '#ffffff'
-						)
-					)
-				),
-				array(
-					'name' => 'p2_background_image',
-					'page' => 'p2_background_image',
-					'title' => __('Background image', 'p2_theme'),
-					'capability' => 'edit_theme_options',
-					'description' => __('Allows you to customize the site background by adding an image or set of images.', 'p2_theme'),
-					'settings' => array(
+						),
 						array(
-							'name' => 'image',
+							'name' => 'single_image',
 							'label' => __('Background image', 'p2_theme'),
 							'type' => 'single_image',
 							'default' => ''
@@ -346,19 +337,19 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							'default' => 'top left'
 						),
 						array(
-							'name' => 'image_slides',
+							'name' => 'multiple_image',
 							'label' => __('Background images (slideshow)', 'p2_theme'),
 							'type' => 'multiple_image',
 							'default' => ''
 						),
 						array(
-							'name' => 'image_transition',
+							'name' => 'slide_transition',
 							'label' => __('Speed of transition (ms)', 'p2_theme'),
 							'type' => 'integer',
 							'default' => '500'
 						),
 						array(
-							'name' => 'image_pause',
+							'name' => 'slide_pause',
 							'label' => __('Pause between slides (ms)', 'p2_theme'),
 							'type' => 'integer',
 							'default' => '5000'
@@ -375,6 +366,28 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 		public static function section_text()
 		{
 			echo '';
+		}
+
+		/**
+		 * gradient / single image / multiple image radio field callback
+		 * @see add_settings_field()
+		 * @param array data passed to callback by add_settings_field
+		 */ 
+		public static function option_additional($fielddata)
+		{
+			$options = self::get_background_options();
+			$name = $fielddata["name"];
+			$sel_single = $sel_multiple = $sel_gradient = '';
+			if ($options[$name] == "single") {
+				$sel_single = ' checked';
+			} elseif ($options[$name] == "multiple") {
+				$sel_multiple = ' checked';
+			} elseif ($options[$name] == "gradient") {
+				$sel_gradient = ' checked';
+			}
+			printf('<p><label for="p2_background_options_additional_gradient"><input type="checkbox" class="checkOnClick chooseOne" name="p2_background_options[additional]" id="p2_background_options_additional_gradient" value="gradient"%s>%s</label>', $sel_gradient, __('Use gradient', 'p2_theme'));
+			printf('<br /><label for="p2_background_options_additional_single"><input type="checkbox" class="checkOnClick chooseOne" name="p2_background_options[additional]" id="p2_background_options_additional_single" value="single"%s>%s</label>', $sel_single, __('Use a single image', 'p2_theme'));
+			printf('<br /><label for="p2_background_options_additional_multiple"><input type="checkbox" class="checkOnClick chooseOne" name="p2_background_options[additional]" id="p2_background_options_additional_multiple" value="multiple"%s>%s</label></p>', $sel_multiple, __('Use multiple images (slideshow)', 'p2_theme'));
 		}
 
 		/**
@@ -417,7 +430,7 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 			$options = self::get_background_options();
 			$name = $fielddata["name"];
 			$chckd = (isset($options[$name]) && $options[$name]) ? ' checked' : '';
-			printf('<input type="checkbox" id="p2_background_options_%s" name="p2_background_options[%s]"%s />', $name, $name, $chckd);
+			printf('<input class="checkOnClick" type="checkbox" id="p2_background_options_%s" name="p2_background_options[%s]"%s />', $name, $name, $chckd);
 		}
 
 		/**
@@ -482,7 +495,7 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 		public static function media_selection_form_control($name, $id, $value, $multiple = true)
 		{
 			$class = $multiple? ' multiple': ' single';
-			printf('<div class="media-selection-control%s"><input type="hidden" name="%s" id="%s" value="%s">', $class, $name, $id, $value);
+			printf('<div class="media-selection-control%s"><input class="checkOnChange" type="hidden" name="%s" id="%s" value="%s">', $class, $name, $id, $value);
 
 			/* make an array from the image IDs */
 			if ( $value && ! empty( $value ) ) {
@@ -521,7 +534,7 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 			$options = self::get_background_options();
 			$name = $fielddata["name"];
 			$value = (isset($options[$name]) && trim($options[$name]) != "") ? trim($options[$name]) : "";
-			printf('<p><select name="p2_background_options[%s]" id="p2_background_options_%s">', $name, $name);
+			printf('<p><select class="checkOnChange" name="p2_background_options[%s]" id="p2_background_options_%s">', $name, $name);
 			foreach (self::$gradient_options as $type => $label) {
 				$sel = $value == $type? ' selected': '';
 				printf('<option value="%s"%s>%s</option>', $type, $sel, $label);	
@@ -552,7 +565,7 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 			$options = self::get_background_options();
 			$name = $fielddata["name"];
 			$value = (isset($options[$name]) && trim($options[$name]) != "") ? trim($options[$name]) : "";
-			printf('<p><select name="p2_background_options[%s]" id="p2_background_options_%s">', $name, $name);
+			printf('<p><select class="checkOnChange" name="p2_background_options[%s]" id="p2_background_options_%s">', $name, $name);
 			foreach (self::$repeat_options as $type => $label) {
 				$sel = $value == $type? ' selected': '';
 				printf('<option value="%s"%s>%s</option>', $type, $sel, $label);	
@@ -621,11 +634,14 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 						$out .= 'background-repeat: no-repeat;';
 						break;
 				}
-			} elseif ( ! empty($options["image"]) && $options['background_repeat'] != 'stretch' ) {
-				if ( $imagesrc = wp_get_attachment_image_src($options["image"]) ) {
-					$out .= sprintf('background-image:url(%s);', $imagesrc[0]);
-					$out .= sprintf('background-repeat:%s;', $options['background_repeat']);
-					$out .= sprintf('background-position:%s;', $options["background_position"]);
+			} elseif ( $options["image"] ) {
+				/* check for single image without stretching */
+				if ( ! empty($options["single_image"]) && $options['background_repeat'] != 'stretch' ) {
+					if ( $imagesrc = wp_get_attachment_image_src($options["single_image"]) ) {
+						$out .= sprintf('background-image:url(%s);', $imagesrc[0]);
+						$out .= sprintf('background-repeat:%s;', $options['background_repeat']);
+						$out .= sprintf('background-position:%s;', $options["background_position"]);
+					}
 				}
 			}
 			$out .= '}</style>';
@@ -640,22 +656,23 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 		{
 			$options = self::get_background_options();
 			$images = array();
-			if ( ! empty($options["image"]) && $options['background_repeat'] == 'stretch' ) {
-				if ($imagesrc = wp_get_attachment_image_src($options["image"])) {
-					print("<p>single image</p><pre>" . print_r($imagesrc, true) . '</pre>');
-				}
-			} elseif ( ! empty($options["image_slides"])) {
-				$slide_ids = explode(',', $options["image_slides"]);
-				$images = array();
-				foreach ($slide_ids as $slide_id) {
-					if ($imagesrc = wp_get_attachment_image_src($slide_id)) {
-						$images[] = $imagesrc;
+			if ( $options["image"] ) {
+				if ( ! empty($options["multiple_image"]) ) {
+					$slide_ids = explode(',', $options["multiple_image"]);
+					$images = array();
+					foreach ($slide_ids as $slide_id) {
+						if ($imagesrc = wp_get_attachment_image_src($slide_id)) {
+							$images[] = $imagesrc;
+						}
+					}
+					if ( count($images) ) {
+						print("<p>multiple images</p><pre>" . print_r($images, true) . '</pre>');
+					}
+				} elseif ( ! empty($options["single_image"]) && $options['background_repeat'] == 'stretch' ) {
+					if ($imagesrc = wp_get_attachment_image_src($options["image"])) {
+						print("<p>single image</p><pre>" . print_r($imagesrc, true) . '</pre>');
 					}
 				}
-				if ( count($images) ) {
-					print("<p>multiple images</p><pre>" . print_r($images, true) . '</pre>');
-				}
-
 			}
 		}
 	}

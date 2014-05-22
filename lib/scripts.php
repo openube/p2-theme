@@ -109,7 +109,7 @@ if ( ! class_exists('p2_theme_scripts') ) {
 			wp_enqueue_script(
 				'p2-theme-admin-script', 
 				get_template_directory_uri() . '/js/admin.js', 
-				array('jquery', 'iris', 'jquery-ui-sortable'),
+				array('jquery', 'wp-color-picker', 'jquery-ui-sortable'),
 				p2::$version,
 				true
 			);
@@ -127,7 +127,7 @@ if ( ! class_exists('p2_theme_scripts') ) {
 			wp_enqueue_style(
 				'p2-theme-admin-style',
 				get_template_directory_uri() . '/css/admin.css',
-				array( 'dashicons' ),
+				array( 'dashicons', 'wp-color-picker' ),
 				p2::$version
 			);
 		}

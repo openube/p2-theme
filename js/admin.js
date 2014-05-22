@@ -17,17 +17,28 @@
 	/* shows/hides elements on the background form */
 	checkBackgroundForm = function()
 	{
-		var g1 = $('#p2_background_options_gradient1'),
+		var ag = $('#p2_background_options_additional_gradient:checked').length,
+			as = $('#p2_background_options_additional_single:checked').length,
+			am = $('#p2_background_options_additional_multiple:checked').length,
+			g1 = $('#p2_background_options_gradient1'),
 			g2 = $('#p2_background_options_gradient2'),
 			g3 = $('#p2_background_options_gradient3'),
 			cs1 = $('#p2_background_options_colour_stop1'),
 			cs2 = $('#p2_background_options_colour_stop2'),
 			gt = $('#p2_background_options_gradient_type')
 			gd = $('#p2_background_options_gradient_direction'),
+			si = $('#p2_background_options_single_image'),
+			mi = $('#p2_background_options_multiple_image'),
+			br = $('#p2_background_options_background_repeat'),
+			bp = $('#p2_background_options_background_position'),
+			st = $('#p2_background_options_slide_transition'),
+			sp = $('#p2_background_options_slide_pause'),
 			to_show = [],
 			to_hide = [],
 			type = null;
-		if ($('#p2_background_options_gradient').is(':checked')) {
+		if (ag) {
+			/* hide the image fields */
+			to_hide.push(si,mi,br,bp,st,sp);
 			/* show relevant gradient controls for type */
 			to_show.push(g1,g2,gt);
 			type = gt.val();
@@ -37,6 +48,11 @@
 					to_show.push(g3,cs1,cs2);
 					to_hide.push(gd);
 					break;
+				case 'horizontal2':
+				case 'vertical2':
+					to_show.push(cs1,cs2);
+					to_hide.push(g3,gd);
+					break;
 				case 'radial':
 					to_hide.push(cs1,cs2,gd,g3);
 					break;
@@ -45,26 +61,41 @@
 					to_hide.push(cs1,cs2,g3);
 					break;
 			}
-			$.each(to_show, function(){
-				this.parents('tr').show();
-			});
-			$.each(to_hide, function(){
-				this.parents('tr').hide();
-			});
-		} else {
+		} else if (as) {
 			/* hide parts of the form which deal with gradients */
-			$.each([g1,g2,g3,cs1,cs2,gt,gd], function(){
-				this.parents('tr').hide();
-			});
-		}
-	};
+			to_hide.push(g1,g2,g3,cs1,cs2,gt,gd,mi,st,sp);
+			to_show.push(si,bp,br);
+		} else if (am) {
+			/* hide the gradient fields */
+			to_hide.push(g1,g2,g3,cs1,cs2,gt,gd,si,bp,br);
+			to_show.push(mi,st,sp);
 
-	/* checkbox for gradient */
-	$('#p2_background_options_gradient').on('click', function(){
+		} else {
+			to_hide.push(g1,g2,g3,cs1,cs2,gt,gd,si,mi,br,bp,st,sp);
+		}
+		/* hide/show fields */
+		$.each(to_hide, function(){
+			this.parents('tr').hide();
+		});
+		$.each(to_show, function(){
+			this.parents('tr').show();
+		});
+	};
+	/* set of checkboxes where only one can be selected */
+	$('.chooseOne').on('click', function(){
+		var val = $(this).val();
+		$('.chooseOne').each(function(){
+			if ($(this).attr("value") != val) {
+				$(this).attr('checked', false);
+			}
+		})
+	});
+	/* checkboxes/radios which alter the form layout */
+	$('.checkOnClick').on('click', function(){
 		checkBackgroundForm();
 	});
-	/* selection of gradient type */
-	$('#p2_background_options_gradient_type').on('change', function(){
+	/* select lists/inputs which alter the form layout */
+	$('.checkOnChange').on('change', function(){
 		checkBackgroundForm();
 	});
 	/* set up form on page load */
@@ -72,7 +103,7 @@
 
 	/* activate colour pickers */
 	if ($('.color-picker-hex').length) {
-		//$('.color-picker-hex').wpColorPicker();
+		$('.color-picker-hex').wpColorPicker();
 	}
 
  	/* make image preview sortable */
