@@ -52,10 +52,10 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 			self::$gradient_options['radial'] = __('Radial', 'p2_theme');
 
 			/* set repeat types */
+			self::$repeat_options['no-repeat'] = __('Do not repeat image', 'p2_theme');
 			self::$repeat_options['repeat-x'] = __('Repeat horizontally', 'p2_theme');
 			self::$repeat_options['repeat-y'] = __('Repeat vertically', 'p2_theme');
-			self::$repeat_options['no-repeat'] = __('Do not repeat image', 'p2_theme');
-			self::$repeat_options['repeat'] = __('Tile', 'p2_theme');
+			self::$repeat_options['repeat'] = __('Repeat (tile)', 'p2_theme');
 			self::$repeat_options['stretch'] = __('Stretch', 'p2_theme');
 
 		}
@@ -239,8 +239,18 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 							}
 							break;
 						case "additional":
-							if ( ! isset($background_options[$details["name"]]) || ! in_array($background_options[$details["name"]], array("gradient", "single", "multiple")) ) {
-								$background_options[$details["name"]] = false;
+							/* check images for image backgrounds */
+							if ( isset($background_options["additional"]) ) {
+							}
+							if ( ! isset($background_options["additional"]) || ! in_array($background_options["additional"], array("gradient", "single", "multiple")) ) {
+								$background_options["additional"] = false;
+							} else {
+								if ( ($background_options["additional"] == "single" && trim($background_options["single_image"]) == "")
+									|| ($background_options["additional"] == "multiple" && trim($background_options["multiple_image"]) == "") ) {
+									$msg = ($background_options["additional"] == "single")? 'No image selected for background': 'No images selected for background';
+									add_settings_error('p2_background_options', 500, $msg);
+									$background_options["additional"] = false;
+								}
 							}
 							break;
 					}
@@ -510,17 +520,18 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 				foreach($image_ids as $image_id) {
 					$image_attributes = wp_get_attachment_image_src( $image_id, 'thumbnail' );
 					if ($image_attributes) {
-						printf('<div class="image-container" data-imageid="%s"><div data-inputid="%s" data-imageid="%s" class="image-inner"><img src="%s" /><a class="remove-image" href="#" title="%s">&#61826;</a></div></div>', $image_id, $id, $image_id, $image_attributes[0], __('Remove image', 'p2mis') );
+						printf('<div class="image-container" data-imageid="%s"><div data-inputid="%s" data-imageid="%s" class="image-inner"><img src="%s" /><a class="remove-image" href="#" title="%s">&#61826;</a></div></div>', $image_id, $id, $image_id, $image_attributes[0], __('Remove image', 'p2_theme') );
 					}
 				}
 
 			} else {
-				print('<p>No images selected.</p>');
+				$msg = $multiple? __('No images selected', 'p2_theme'): __('No image selected', 'p2_theme');
+				printf('<p>%s.</p>', $msg);
 			}
 			print('</div><span style="clear:both;">&nbsp;</span>');
 			/* button which will activate the media browser/uploader */
 			$buttonClass = $multiple? 'mediaBrowserButtonImages': 'mediaBrowserButtonImage';
-			$buttonText = $multiple? 'Select Images': 'Select Image';
+			$buttonText = $multiple? __('Select Images', 'p2_theme'): __('Select Image', 'p2_theme');
 			printf('<p class="media-selection-button"><a class="button-secondary %s" data-inputid="%s" href="#">%s</a></p></div>', $buttonClass, $id, $buttonText);
 		}
 
@@ -590,35 +601,36 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 		 */
 		public static function wp_head()
 		{
-			$out = '<style type="text/css">html {';
 			$options = self::get_background_options();
-			if ($options['gradient']) {
-				switch ('gradient_type') {
+			//print('<pre>' . print_r($options, true) . '</pre>');
+			$out = '';
+			if ($options['additional'] == 'gradient') {
+				switch ($options['gradient_type']) {
 					case "horizontal2":
-						$out .= sprintf('background-image: -webkit-linear-gradient(left, color-stop(%s %s), color-stop(%s %s));', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
-						$out .= sprintf('background-image: -o-linear-gradient(left, %s %s, %s %s);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
-						$out .= sprintf('background-image: linear-gradient(to right, %s %s, %s %s);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
+						$out .= sprintf('background-image: -webkit-linear-gradient(left, color-stop(%s %s%%), color-stop(%s %s%%));', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
+						$out .= sprintf('background-image: -o-linear-gradient(left, %s %s%%, %s %s%%);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
+						$out .= sprintf('background-image: linear-gradient(to right, %s %s%%, %s %s%%);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
 						$out .= 'background-repeat: repeat-x;';
 						$out .= sprintf('filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=\'%s\', endColorstr=\'%s\', GradientType=1)";', $options['gradient1'], $options['gradient2']);
 						break;
 					case "horizontal3":
-						$out .= sprintf('background-image: -webkit-linear-gradient(left, %s, %s %s, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
-						$out .= sprintf('background-image: -o-linear-gradient(left, %s, %s %s, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
-						$out .= sprintf('background-image: linear-gradient(to right, %s, %s %s, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
+						$out .= sprintf('background-image: -webkit-linear-gradient(left, %s, %s %s%%, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
+						$out .= sprintf('background-image: -o-linear-gradient(left, %s, %s %s%%, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
+						$out .= sprintf('background-image: linear-gradient(to right, %s, %s %s%%, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
 						$out .= 'background-repeat: no-repeat;';
 						$out .= sprintf('filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=\'%s\', endColorstr=\'%s\', GradientType=1)";', $options['gradient1'], $options['gradient3']);
 						break;
 					case "vertical2":
-						$out .= sprintf('background-image: -webkit-linear-gradient(top, %s %s, %s %s);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
-						$out .= sprintf('background-image: -o-linear-gradient(top, %s %s, %s %s);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
-						$out .= sprintf('background-image: linear-gradient(to bottom, %s %s, %s %s);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
+						$out .= sprintf('background-image: -webkit-linear-gradient(top, %s %s%%, %s %s%%);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
+						$out .= sprintf('background-image: -o-linear-gradient(top, %s %s%%, %s %s%%);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
+						$out .= sprintf('background-image: linear-gradient(to bottom, %s %s%%, %s %s%%);', $options['gradient1'], $options['colour_stop1'], $options['gradient2'], $options['colour_stop2']);
 						$out .= 'background-repeat: repeat-x;';
 						$out .= sprintf('filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=\'%s\', endColorstr=\'%s\', GradientType=0)";', $options['gradient1'], $options['gradient2']);
 						break;
 					case "vertical3":
-						$out .= sprintf('background-image: -webkit-linear-gradient(%s, %s %s, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
-						$out .= sprintf('background-image: -o-linear-gradient(%s, %s %s, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
-						$out .= sprintf('background-image: linear-gradient(%s, %s %s, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
+						$out .= sprintf('background-image: -webkit-linear-gradient(%s, %s %s%%, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
+						$out .= sprintf('background-image: -o-linear-gradient(%s, %s %s%%, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
+						$out .= sprintf('background-image: linear-gradient(%s, %s %s%%, %s);', $options['gradient1'], $options['gradient2'], $options['colour_stop2'], $options['gradient3']);
 						$out .= 'background-repeat: no-repeat;';
 						$out .= sprintf('filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=\'%s\', endColorstr=\'%s\', GradientType=0)";', $options['gradient1'], $options['gradient3']);
 						break;
@@ -634,7 +646,7 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 						$out .= 'background-repeat: no-repeat;';
 						break;
 				}
-			} elseif ( $options["image"] ) {
+			} elseif ( $options["additional"] == "single" ) {
 				/* check for single image without stretching */
 				if ( ! empty($options["single_image"]) && $options['background_repeat'] != 'stretch' ) {
 					if ( $imagesrc = wp_get_attachment_image_src($options["single_image"]) ) {
@@ -644,8 +656,9 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 					}
 				}
 			}
-			$out .= '}</style>';
-			print($out);
+			if ( ! empty($out) ) {
+				printf('<style type="text/css">html {%s}</style>', $out);
+			}
 		}
 
 		/**
@@ -656,23 +669,31 @@ if ( ! class_exists( 'p2_custom_background' ) ) {
 		{
 			$options = self::get_background_options();
 			$images = array();
-			if ( $options["image"] ) {
+			if ( $options["additional"] == "multiple" ) {
 				if ( ! empty($options["multiple_image"]) ) {
 					$slide_ids = explode(',', $options["multiple_image"]);
 					$images = array();
 					foreach ($slide_ids as $slide_id) {
 						if ($imagesrc = wp_get_attachment_image_src($slide_id)) {
-							$images[] = $imagesrc;
+							$images[] = $imagesrc[0];
 						}
 					}
-					if ( count($images) ) {
-						print("<p>multiple images</p><pre>" . print_r($images, true) . '</pre>');
-					}
-				} elseif ( ! empty($options["single_image"]) && $options['background_repeat'] == 'stretch' ) {
-					if ($imagesrc = wp_get_attachment_image_src($options["image"])) {
-						print("<p>single image</p><pre>" . print_r($imagesrc, true) . '</pre>');
+				}
+			} elseif ( $options["additional"] == "single") {
+				if ( ! empty($options["single_image"]) && $options['background_repeat'] == 'stretch' ) {
+					if ($imagesrc = wp_get_attachment_image_src($options["single_image"])) {
+						$images[] = $imagesrc[0];
 					}
 				}
+			}
+			if ( count($images) ) {
+				print('<script type="text/javascript">(function($){');
+				if ( count($images) == 1) {
+					printf('$.backstretch(["%s"]);', $images[0]);
+				} else {
+					printf('$.backstretch(["%s"],{fade:%d,transition:%d});', implode('","', $images), $options["slide_transition"], $options["slide_pause"]);
+				}
+				print('})(jQuery);</script>');
 			}
 		}
 	}

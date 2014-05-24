@@ -37,7 +37,8 @@ module.exports = function(grunt) {
 					'bootstrap/js/tab.js', 
 					//'bootstrap/js/tooltip.js', 
 					'bootstrap/js/transition.js',
-					'js/theme-scripts.js'
+					'jquery-backstretch/jquery.backstretch.js',
+					'js/theme.scripts.js'
 				],
 				// the location of the resulting JS file
 				dest: 'js/p2.js'

@@ -45,8 +45,8 @@
 			switch (type) {
 				case 'horizontal3':
 				case 'vertical3':
-					to_show.push(g3,cs1,cs2);
-					to_hide.push(gd);
+					to_show.push(g3,cs2);
+					to_hide.push(gd,cs1);
 					break;
 				case 'horizontal2':
 				case 'vertical2':
@@ -62,9 +62,16 @@
 					break;
 			}
 		} else if (as) {
-			/* hide parts of the form which deal with gradients */
+			/* hide the gradient fields */
 			to_hide.push(g1,g2,g3,cs1,cs2,gt,gd,mi,st,sp);
-			to_show.push(si,bp,br);
+			/* show single image field */
+			to_show.push(si,br);
+			/* if repeat is set to stretch or repeat, don't show position */
+			if (br.val() == "stretch" || br.val() == "repeat") {
+				to_hide.push(bp);
+			} else {
+				to_show.push(bp);
+			}
 		} else if (am) {
 			/* hide the gradient fields */
 			to_hide.push(g1,g2,g3,cs1,cs2,gt,gd,si,bp,br);
