@@ -22,3 +22,6 @@
 [submodule "p2_media_image_select"]
 	path = p2_media_image_select
 	url = git@github.com:bjorsq/p2_media_image_select.git
+[submodule "elements"]
+	path = elements
+	url = https://github.com/dmitryf/elements.git

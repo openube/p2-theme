@@ -28,15 +28,15 @@ module.exports = function(grunt) {
 					//'bootstrap/js/affix.js', 
 					//'bootstrap/js/alert.js', 
 					//'bootstrap/js/button.js',
-					'bootstrap/js/carousel.js', 
-					'bootstrap/js/collapse.js', 
-					'bootstrap/js/dropdown.js', 
+					//'bootstrap/js/carousel.js', 
+					//'bootstrap/js/collapse.js', 
+					//'bootstrap/js/dropdown.js', 
 					//'bootstrap/js/modal.js', 
 					//'bootstrap/js/popover.js', 
 					//'bootstrap/js/scrollspy.js', 
-					'bootstrap/js/tab.js', 
+					//'bootstrap/js/tab.js', 
 					//'bootstrap/js/tooltip.js', 
-					'bootstrap/js/transition.js',
+					'bxslider-4/jquery.bxslider.js',
 					'jquery-backstretch/jquery.backstretch.js',
 					'js/theme.scripts.js'
 				],
@@ -48,7 +48,7 @@ module.exports = function(grunt) {
 			theme: {
 				options: {
 					// the banner is inserted at the top of the output
-					banner: '/*!\n * <%= pkg.name %>\n * Twitter Bootstrap jQuery Plugins and theme scripts\n * generated <%= grunt.template.today("dd-mm-yyyy") %>\n */\n',
+					banner: '/*!\n * <%= pkg.name %>\n * jQuery Plugins and theme scripts\n * generated <%= grunt.template.today("dd-mm-yyyy") %>\n */\n',
 					mangle: false
 				},
 				files: {
@@ -58,7 +58,7 @@ module.exports = function(grunt) {
 			development: {
 				options: {
 					// the banner is inserted at the top of the output
-					banner: '/*!\n *<%= pkg.name %>\nTwitter Bootstrap jQuery Plugins and theme scripts\n * generated <%= grunt.template.today("dd-mm-yyyy") %>\n */\n',
+					banner: '/*!\n *<%= pkg.name %>\njQuery Plugins and theme scripts\n * generated <%= grunt.template.today("dd-mm-yyyy") %>\n */\n',
 					mangle: false,
 					compress: false,
 					beautify: true
@@ -71,7 +71,7 @@ module.exports = function(grunt) {
 		less: {
 			tinymce: {
 				options: {
-					paths: ["css/less","bootstrap/less"],
+					paths: ["css/less"],
 					cleancss:true
 				},
 				files: {
@@ -80,7 +80,7 @@ module.exports = function(grunt) {
 			},
 			theme: {
 				options: {
-					paths: ["css/less","bootstrap/less"],
+					paths: ["css/less"],
 					cleancss:true
 				},
 				files: {
@@ -89,7 +89,7 @@ module.exports = function(grunt) {
 			},
 			admin: {
 				options: {
-					paths: ["css/less","bootstrap/less"],
+					paths: ["css/less"],
 					cleancss:true
 				},
 				files: {
@@ -98,7 +98,7 @@ module.exports = function(grunt) {
 			},
 			development: {
 				options: {
-					paths: ["css/less","bootstrap/less"],
+					paths: ["css/less"],
 					cleancss:false
 				},
 				files: {
