@@ -19,6 +19,7 @@
     "grunt-contrib-less": "*",
     "grunt-contrib-concat": "*",
     "grunt-contrib-uglify": "*",
-    "grunt-banner": "*"
+    "grunt-banner": "*",
+    "grunt-contrib-watch": "*"
   }
 }
