@@ -39,6 +39,7 @@ if ( ! class_exists( 'p2' ) ) {
 			/* get the theme options */
 			$theme_options = p2_theme_options::get_theme_options();
 			//print('<pre>' . print_r($theme_options, true) . '</pre>');exit;
+			$supported_features = apply_filters( 'p2-theme-features', array( __CLASS__, 'get_supported_features' ) );
 
 			// Make theme available for translation
 			load_theme_textdomain('p2', get_template_directory() . '/lang');
@@ -48,6 +49,13 @@ if ( ! class_exists( 'p2' ) ) {
 			 * and comments to output valid HTML5.
 			 */
 			add_theme_support( 'html5', array( 'search-form', 'comment-form', 'comment-list' ) );
+
+			/**
+			 * add_theme_support for different navigation elements
+			 */
+			add_theme_support( 'p2_top_navigation' );
+			add_theme_support( 'p2_header_navigation' );
+			add_theme_support( 'p2_footer_navigation' );
 
 			// Tell the TinyMCE editor to use a custom stylesheet
 			add_editor_style('/editor-style.css');
@@ -336,5 +344,10 @@ if ( ! class_exists( 'p2' ) ) {
 		}
 		
 	}
-	add_action( 'after_setup_theme', array('p2', 'register') );
+	/**
+	 * this class is run with priority 1
+	 * all other classes are run on the same hook with priorities over 100
+	 * to enable child themes to remove theme support for various features
+	 */
+	add_action( 'after_setup_theme', array('p2', 'register'), 1 );
 }

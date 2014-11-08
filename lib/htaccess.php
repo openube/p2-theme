@@ -37,5 +37,5 @@ if ( ! class_exists('p2_htaccess')) :
 			return $content;
 		}
 	}
-	p2_htaccess::register();
+	add_action( 'after_setup_theme', array('p2_htaccess', 'register'), 101 );
 }

@@ -12,7 +12,7 @@ if ( ! class_exists( 'p2_navigation' ) ) {
 		public static function register()
 		{
 			/* register menus */
-			add_action( 'after_setup_theme', array(__CLASS__, 'register_nav_menus') );
+			add_action( 'after_setup_theme', array(__CLASS__, 'register_nav_menus'), 101 );
 			/* register sidebars */
 			add_action( 'widgets_init', array(__CLASS__, 'register_sidebars') );
 			/* tidy up menu generation */
@@ -26,11 +26,20 @@ if ( ! class_exists( 'p2_navigation' ) ) {
 		 */
 		public static function register_nav_menus()
 		{
-			register_nav_menus(array(
+			$menus = array(
 				'top_navigation' => 'Top navigation (fixed above header)',
 				'header_navigation' => 'Top navigation (static below header)',
 				'footer_navigation' => 'Footer Navigation'
-			));
+			);
+			$supported_menus = array();
+			foreach ( $menus as $menu => $label ) {
+				if ( current_theme_supports( 'p2_' . $menu ) ) {
+					$supported_menus[$menu] = $label;
+				}
+			}
+			if ( count( $supported_menus ) ) {
+				register_nav_menus( $supported_menus );
+			}
 		}
 
 		/**
