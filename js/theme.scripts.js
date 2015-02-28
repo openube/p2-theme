@@ -1,1 +1,1 @@
-/*! p2-theme javascript */
+/* p2-theme javascript */

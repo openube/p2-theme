@@ -77,6 +77,7 @@
 	// the order this is carried out in is important (least specific rules first)
 	function updateSettings()
 	{
+		var prop, val, setting;
 		for (var i = 0; i < cs.length; i++) {
 			if (cs[i].settings.length) {
 				for (var j = 0; j < cs[i].settings.length; j++) {
@@ -85,14 +86,14 @@
 						/* selector is defined on this setting */
 						if (typeof setting.selector === "string") {
 							/* single selector */
-							var prop = setting.property? setting.property: 'color';
-							var val = setting.value_fmt? setting.value_fmt.replace('%s', setting.value): setting.value;
+							prop = setting.property? setting.property: 'color';
+							val = setting.value_fmt? setting.value_fmt.replace('%s', setting.value): setting.value;
 							$(setting.selector).css(prop, val);
 						} else {
 							/* multiple selector */
 							for(var k = 0; k < setting.selector.length; k++) {
-								var prop = setting.property && setting.property[k]? setting.property[k]: 'color';
-								var val = setting.value_fmt && setting.value_fmt[k]? setting.value_fmt[k].replace('%s', setting.value): setting.value;
+								prop = setting.property && setting.property[k]? setting.property[k]: 'color';
+								val = setting.value_fmt && setting.value_fmt[k]? setting.value_fmt[k].replace('%s', setting.value): setting.value;
 								$(setting.selector[k]).css(prop, val);
 							}
 						}

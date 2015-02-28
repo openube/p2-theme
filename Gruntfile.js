@@ -10,14 +10,14 @@ module.exports = function(grunt) {
 			},
 			theme: {
 				options: {
-					banner: '/*!\nTheme Name: <%= pkg.name %>\nTheme URI: <%= pkg.homepage %>\nDescription: <%= pkg.description %>\nVersion: <%= pkg.version %>\nAuthor: <%= pkg.author %>\nAuthor URI: <%= pkg.authoruri %>\nLicense: <%= pkg.license %>\nLicense URI: <%= pkg.licenseuri %>\n*/'
+					banner: '/*!\nTheme Name: <%= pkg.name %>\nTheme URI: <%= pkg.homepage %>\nDescription: <%= pkg.description %>\nVersion: <%= pkg.version %>\nAuthor: <%= pkg.author %>\nAuthor URI: <%= pkg.authoruri %>\nLicense: <%= pkg.license %>\nLicense URI: <%= pkg.licenseuri %>\nGitHub Theme URI: <%= pkg.repository.url %>\n*/\n'
 				},
 				src: 'css/style.min.css',
 				dest: 'style.css'
 			},
 			development: {
 				options: {
-					banner: '/*!\nTheme Name: <%= pkg.name %>\nTheme URI: <%= pkg.homepage %>\nDescription: <%= pkg.description %>\nVersion: <%= pkg.version %>\nAuthor: <%= pkg.author %>\nAuthor URI: <%= pkg.authoruri %>\nLicense: <%= pkg.license %>\nLicense URI: <%= pkg.licenseuri %>\n*/'
+					banner: '/*!\nTheme Name: <%= pkg.name %>\nTheme URI: <%= pkg.homepage %>\nDescription: <%= pkg.description %>\nVersion: <%= pkg.version %>\nAuthor: <%= pkg.author %>\nAuthor URI: <%= pkg.authoruri %>\nLicense: <%= pkg.license %>\nLicense URI: <%= pkg.licenseuri %>\nGitHub Theme URI: <%= pkg.repository.url %>\n*/\n'
 				},
 				src: 'css/style.dev.css',
 				dest: 'style.css'
@@ -42,6 +42,15 @@ module.exports = function(grunt) {
 				],
 				// the location of the resulting JS file
 				dest: 'js/p2.js'
+			}
+		},
+		jshint: {
+			all: {
+				options: {
+					'-W030': true,
+					'-W083': true,
+				},
+				src: ['js/admin.js', 'js/theme.scripts.js', 'js/customiser.js']
 			}
 		},
 		uglify: {
@@ -112,10 +121,11 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-less');
+	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-banner');
 
 	// Default task(s).
-	grunt.registerTask('default', ['less:theme', 'less:tinymce', 'concat:theme', 'concat:js', 'uglify:theme']);
-	grunt.registerTask('dev', ['less:development', 'concat:development', 'concat:js', 'uglify:development']);
+	grunt.registerTask('default', ['less:theme', 'less:tinymce', 'concat:theme', 'jshint:all', 'concat:js', 'uglify:theme']);
+	grunt.registerTask('dev', ['less:development', 'concat:development', 'jshint:all', 'concat:js', 'uglify:development']);
 
 };

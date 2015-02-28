@@ -25,7 +25,7 @@
 			g3 = $('#p2_background_options_gradient3'),
 			cs1 = $('#p2_background_options_colour_stop1'),
 			cs2 = $('#p2_background_options_colour_stop2'),
-			gt = $('#p2_background_options_gradient_type')
+			gt = $('#p2_background_options_gradient_type'),
 			gd = $('#p2_background_options_gradient_direction'),
 			si = $('#p2_background_options_single_image'),
 			mi = $('#p2_background_options_multiple_image'),
@@ -95,7 +95,7 @@
 			if ($(this).attr("value") != val) {
 				$(this).attr('checked', false);
 			}
-		})
+		});
 	});
 	/* checkboxes/radios which alter the form layout */
 	$('.checkOnClick').on('click', function(){
@@ -232,7 +232,7 @@
 		imgframe.on('open', function() {
 			/* pre-select image */
 			var imgID = $('#'+inputID).val();
-			if (imgID != '' && parseInt(imgID) > 0) {
+			if (imgID !== '' && parseInt(imgID) > 0) {
 				var selection = imgframe.state().get('selection');
 				attachment = wp.media.attachment(imgID);
 				attachment.fetch();
