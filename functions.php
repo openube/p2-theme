@@ -6,7 +6,6 @@
  * @author Peter Edwards <Peter.Edwards@p-2.biz>
  * @version 1.0
  */
-
 locate_template('lib/options.php', true, true);		/* Configuration options */
 locate_template('lib/cleanup.php', true, true);		/* cleanup functions */
 locate_template('lib/setup.php', true, true);		/* Theme setup */

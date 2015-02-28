@@ -20,6 +20,7 @@
     "grunt-contrib-concat": "*",
     "grunt-contrib-jshint": "*",
     "grunt-contrib-uglify": "*",
-    "grunt-banner": "*"
+    "grunt-banner": "*",
+    "grunt-contrib-watch": "*"
   }
 }

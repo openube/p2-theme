@@ -36,8 +36,8 @@ module.exports = function(grunt) {
 					//'bootstrap/js/scrollspy.js', 
 					//'bootstrap/js/tab.js', 
 					//'bootstrap/js/tooltip.js', 
-					'bxslider-4/jquery.bxslider.js',
-					'jquery-backstretch/jquery.backstretch.js',
+					'bower_components/bxslider-4/jquery.bxslider.js',
+					'bower_components/jquery-backstretch/jquery.backstretch.js',
 					'js/theme.scripts.js'
 				],
 				// the location of the resulting JS file
@@ -123,9 +123,13 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-less');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-banner');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 
-	// Default task(s).
+	// Default task.
 	grunt.registerTask('default', ['less:theme', 'less:tinymce', 'concat:theme', 'jshint:all', 'concat:js', 'uglify:theme']);
-	grunt.registerTask('dev', ['less:development', 'concat:development', 'jshint:all', 'concat:js', 'uglify:development']);
+	// Dev task
+	grunt.registerTask('dev', ['less:development', 'concat:development', 'concat:js', 'uglify:development']);
+	// Production task
+	grunt.registerTask('release', ['less:theme', 'less:tinymce', 'concat:theme', 'concat:js', 'uglify:theme']);
 
 };
